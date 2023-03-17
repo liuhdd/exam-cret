@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/services"
-	"log"
-	"net/http"
 )
 
 type AuthController struct {
@@ -40,7 +40,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 	}
 	err := ac.authService.Login(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("failed to login. username or password is wrong")})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to login. username or password is wrong"})
 		return
 	}
 	session := sessions.Default(c)
@@ -55,7 +55,7 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	err := session.Save()
 	if err != nil {
 		log.Printf("failed to save session")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to logout.")})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to logout."})
 		return
 	}
 
