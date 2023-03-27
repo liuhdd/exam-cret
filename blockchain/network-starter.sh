@@ -6,4 +6,3 @@ cd ./test-network
 ./network.sh createChannel
 ./network.sh deployCC -ccn examcret -ccp ../contract/ -ccl go
 
-

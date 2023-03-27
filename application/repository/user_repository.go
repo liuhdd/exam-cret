@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"gorm.io/gorm"
 )
@@ -11,7 +12,7 @@ type UserRepository interface {
 }
 
 func NewUserRepository() UserRepository {
-	db := GetDB()
+	db := config.GetDB()
 	db.AutoMigrate(&models.User{})
 	repo := &userRepository{db}
 	return repo
