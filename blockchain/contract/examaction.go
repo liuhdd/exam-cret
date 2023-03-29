@@ -9,6 +9,7 @@ const (
 )
 
 type ExamAction struct {
+	ObjectType string `json:"object_type"`
 	ActionID   string `json:"action_id"`
 	ExamID     string `json:"exam_id"`
 	StudentID  string `json:"student_id"`
@@ -16,4 +17,13 @@ type ExamAction struct {
 	ActionTime int64  `json:"action_time"`
 	QuestionID string `json:"question_id"`
 	Answer     string `json:"answer"`
+}
+
+type MarkAction struct {
+	ObjectType string `json:"action_type"`
+	ActionID   string `json:"action_id"`
+	ExamID     string `json:"exam_id"`
+	StudentID  string `json:"student_id"`
+	QuestionID string `json:"question_id"`
+	Score      int    `json:"score"`
 }

@@ -36,6 +36,8 @@ func SetupRoutes() *gin.Engine {
 	{
 		action.POST("upload", controllers.UploadAction)
 		action.POST("query/:id", controllers.SelectActionById)
+		action.POST("queryByExamAndStudent", controllers.SelectActionByExamAndStudentID)
+		action.POST("selector", controllers.QueryAction)
 	}
 	return engine
 }

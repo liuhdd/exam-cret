@@ -1,6 +1,7 @@
 package models
 
 type ExamAction struct {
+	ObjectType string `json:"object_type"`
 	ActionID   string `json:"action_id"`
 	ExamID     string `json:"exam_id"gorm:"not null"`
 	StudentID  string `json:"student_id"gorm:"not null"`

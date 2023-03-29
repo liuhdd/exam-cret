@@ -14,8 +14,8 @@ type ActionRepository interface {
 	AddAction(*models.ExamAction) error
 	FindActionByActionID(string) (*models.ExamAction, error)
 	FindActionsByStudentID(string) []*models.ExamAction
-	FindActionsByExamID(string) []*models.ExamAction
-	QueryAction(string) []*models.ExamAction
+	FindActionsByExamAndStudentID(string, string) ([]*models.ExamAction, error)
+	QueryAction(string) ([]*models.ExamAction, error)
 }
 
 type actionRepository struct {
@@ -40,6 +40,7 @@ func (a *actionRepository) AddAction(action *models.ExamAction) error {
 		return errors.New("nil point of action")
 	}
 	_, err := a.contract.SubmitTransaction("UploadAction",
+		action.ObjectType,
 		action.ActionID,
 		action.ExamID,
 		action.StudentID,
@@ -71,17 +72,39 @@ func (a *actionRepository) FindActionByActionID(id string) (*models.ExamAction, 
 	return action, nil
 }
 
+func (a *actionRepository) FindActionsByExamAndStudentID(examID, studentID string) ([]*models.ExamAction, error) {
+	if examID == "" || studentID == "" {
+		return nil, errors.New("miss examID and studentID")
+	}
+	bytes, err := a.contract.SubmitTransaction("QueryActionByExamAndStudentID", "exam_action", examID, studentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query action: %s", err)
+	}
+	if bytes == nil {
+		return nil, nil
+	}
+	var actions []*models.ExamAction
+	err = json.Unmarshal(bytes, actions)
+	if err != nil {
+		return nil, err
+	}
+	return actions, nil
+}
+
 func (a *actionRepository) FindActionsByStudentID(s string) []*models.ExamAction {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a *actionRepository) FindActionsByExamID(s string) []*models.ExamAction {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (a actionRepository) QueryAction(s string) []*models.ExamAction {
-	//TODO implement me
-	panic("implement me")
+func (a actionRepository) QueryAction(selector string) ([]*models.ExamAction, error) {
+	bytes, err := a.contract.SubmitTransaction("QueryAction", selector)
+	if err != nil {
+		return nil, err
+	}
+	var actions []*models.ExamAction
+	err = json.Unmarshal(bytes, &actions)
+	if err != nil {
+		return nil, err
+	}
+	return actions, nil
 }

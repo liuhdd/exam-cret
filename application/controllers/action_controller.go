@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/services"
+	"log"
 	"net/http"
 )
 
@@ -29,16 +29,49 @@ func UploadAction(c *gin.Context) {
 }
 
 func SelectActionById(c *gin.Context) {
-	s := "{\"action_id\":\"action1\",\"exam_id\":\"exam1\",\"student_id\":\"student1\",\"action_type\":1,\"action_time\":1678293569,\"question_id\":\"question1\",\"answer\":\"123123\"}"
-	a := &models.ExamAction{}
-	json.Unmarshal([]byte(s), a)
-
-	c.JSON(http.StatusOK, a)
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "miss param id"})
+		return
+	}
+	action, err := actionService.QueryActionByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to select action"})
+		return
+	}
+	if action == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "action not exists"})
+		return
+	}
+	c.JSON(http.StatusOK, action)
 }
 
-func SelectActionByStudentId(c *gin.Context) {
-	s := "[{\"action_id\":\"action1\",\"exam_id\":\"exam1\",\"student_id\":\"student1\",\"action_type\":1,\"action_time\":1678293569,\"question_id\":\"question1\",\"answer\":\"123123\"},{\"action_id\":\"action2\",\"exam_id\":\"exam1\",\"student_id\":\"student1\",\"action_type\":1,\"action_time\":1678293569,\"question_id\":\"question2\",\"answer\":\"123123\"}]"
-	var a []*models.ExamAction
-	json.Unmarshal([]byte(s), &a)
-	c.JSON(http.StatusOK, a)
+func SelectActionByExamAndStudentID(c *gin.Context) {
+	student := c.Query("exam_id")
+	exam := c.Query("student_id")
+	if exam == "" || student == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "miss query params"})
+		return
+	}
+	actions, err := actionService.SelectActionByExamAndStudentID(exam, student)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query actions"})
+		return
+	}
+	c.JSON(http.StatusOK, actions)
+}
+
+func QueryAction(c *gin.Context) {
+	query, err := c.GetRawData()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "argument miss"})
+		return
+	}
+	actions, err := actionService.QueryAction(string(query))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query actions"})
+		return
+	}
+	log.Println(actions)
+	c.JSON(http.StatusOK, actions)
 }

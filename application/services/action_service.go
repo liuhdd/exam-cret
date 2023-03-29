@@ -12,6 +12,8 @@ var as *actionService
 type ActionService interface {
 	QueryActionByID(string) (*models.ExamAction, error)
 	UploadAction(action *models.ExamAction) error
+	SelectActionByExamAndStudentID(string, string) ([]*models.ExamAction, error)
+	QueryAction(string) ([]*models.ExamAction, error)
 }
 
 type actionService struct {
@@ -29,26 +31,44 @@ func NewActionService() ActionService {
 	return as
 }
 
-func (a *actionService) QueryActionByID(id string) (*models.ExamAction, error) {
+func (as *actionService) QueryActionByID(id string) (*models.ExamAction, error) {
 	if id == "" {
 		return nil, errors.New("miss param id")
 	}
-	action, err := a.actionRepo.FindActionByActionID(id)
+	action, err := as.actionRepo.FindActionByActionID(id)
 	if err != nil {
-		log.Fatalf("error in QueryActionByID: %s", err)
+		log.Printf("error in QueryActionByID: %s", err)
 		return nil, err
 	}
 	return action, nil
 }
 
-func (a *actionService) UploadAction(action *models.ExamAction) error {
+func (as *actionService) UploadAction(action *models.ExamAction) error {
 	if action == nil {
 		return errors.New("nil pointer to action")
 	}
-	err := a.actionRepo.AddAction(action)
+	err := as.actionRepo.AddAction(action)
 	if err != nil {
-		log.Fatalf("failed to upload action: %s", err)
+		log.Printf("failed to upload action: %s", err)
 		return err
 	}
 	return nil
+}
+
+func (as *actionService) SelectActionByExamAndStudentID(examID string, studentID string) ([]*models.ExamAction, error) {
+	actions, err := as.actionRepo.FindActionsByExamAndStudentID(examID, studentID)
+	if err != nil {
+		log.Printf("error in find action: %s", err)
+		return nil, err
+	}
+	return actions, err
+}
+
+func (as *actionService) QueryAction(query string) ([]*models.ExamAction, error) {
+	bytes, err := as.actionRepo.QueryAction(query)
+	if err != nil {
+		log.Printf("error in QueryAction: %s", err)
+		return nil, err
+	}
+	return bytes, nil
 }

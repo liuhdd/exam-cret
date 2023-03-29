@@ -1,0 +1,8 @@
+{
+  "selector": {
+    "object_type": "%s",
+    "exam_id": "%s",
+    "student_id": "%s"
+  },
+  "use_index": ["_design/exam_student_index_doc", "exam_student_index"]
+}

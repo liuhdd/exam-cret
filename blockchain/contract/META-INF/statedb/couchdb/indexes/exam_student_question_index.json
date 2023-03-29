@@ -1,0 +1,8 @@
+{
+  "index": {
+    "fields": ["objection_type", "question_id", "exam_id", "student_id"]
+  },
+  "name": "question_exam_student_index",
+  "ddoc": "question_exam_student_index_doc",
+  "type": "json"
+}

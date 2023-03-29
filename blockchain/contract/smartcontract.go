@@ -10,7 +10,7 @@ type ActionContract struct {
 }
 
 func (sc *ActionContract) UploadAction(ctx ActionContextInterface,
-	actionID string, examID string, studentID string, actionType uint,
+	objectType string, actionID string, examID string, studentID string, actionType uint,
 	time int64, questionID string, answer string) error {
 
 	json, err := ctx.GetStub().GetState(actionID)
@@ -19,6 +19,7 @@ func (sc *ActionContract) UploadAction(ctx ActionContextInterface,
 	}
 
 	action := &ExamAction{
+		ObjectType: objectType,
 		ActionID:   actionID,
 		ExamID:     examID,
 		StudentID:  studentID,
@@ -31,7 +32,6 @@ func (sc *ActionContract) UploadAction(ctx ActionContextInterface,
 	if err != nil {
 		return fmt.Errorf("failed to uploead exam action: %s, with error: %s", examID, err)
 	}
-
 	return nil
 }
 func (sc *ActionContract) QueryActionByID(ctx ActionContextInterface,
@@ -47,6 +47,15 @@ func (sc *ActionContract) QueryActionByID(ctx ActionContextInterface,
 	return action, nil
 
 }
-func (sc *ActionContract) QueryAction(ctx contractapi.TransactionContextInterface) {
 
+func (sc *ActionContract) QueryActionByExamAndStudentID(ctx ActionContextInterface, objectType, examID, studentID string) ([]byte, error) {
+	actions, err := ctx.GetActionByExamAndStudentID(objectType, examID, studentID)
+	if err != nil {
+		return nil, fmt.Errorf("error with querying actions: %s", err)
+	}
+	return actions, nil
+
+}
+func (sc *ActionContract) QueryAction(ctx ActionContextInterface, queryJson string) ([]*ExamAction, error) {
+	return ctx.QueryAction(queryJson)
 }
