@@ -5,6 +5,7 @@ import (
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"log"
+	"github.com/liuhdd/exam-cret/application/dtos"
 )
 
 var as *actionService
@@ -14,6 +15,7 @@ type ActionService interface {
 	UploadAction(action *models.ExamAction) error
 	SelectActionByExamAndStudentID(string, string) ([]*models.ExamAction, error)
 	QueryAction(string) ([]*models.ExamAction, error)
+	ListActionInQuestion(string, string, string) ([]*models.ExamAction, error)
 }
 
 type actionService struct {
@@ -71,4 +73,29 @@ func (as *actionService) QueryAction(query string) ([]*models.ExamAction, error)
 		return nil, err
 	}
 	return bytes, nil
+}
+
+func (as *actionService) ListActionInQuestion(examID string, studentID string, questionID string) ([]*models.ExamAction, error) {
+	actions, err := as.actionRepo.FindActionsByExamAndStudentID(examID, studentID)
+	if err != nil {
+		log.Printf("error in find action: %s", err)
+		return nil, err
+	}
+	var result []*models.ExamAction
+	for _, action := range actions {
+		if action.QuestionID == questionID {
+			result = append(result, action)
+		}
+	}
+	return result, nil
+}
+
+func (as *actionService) ShowExamResult(examID string, studentID string) (*dtos.ExamResult, error) {
+	panic("implement me")
+	// actions, err := as.actionRepo.FindActionsByExamAndStudentID(examID, studentID)
+	// if err != nil {
+	// 	log.Printf("error in find action: %s", err)
+	// 	return nil, err
+	// }
+	// return nil, nil
 }

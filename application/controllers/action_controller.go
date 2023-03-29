@@ -75,3 +75,20 @@ func QueryAction(c *gin.Context) {
 	log.Println(actions)
 	c.JSON(http.StatusOK, actions)
 }
+
+func ListActionInQuestion(c *gin.Context) {
+	questionID := c.Query("id")
+	studentID := c.Query("student_id")
+	examID := c.Query("exam_id")
+	if questionID == "" || studentID == "" || examID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "miss query params"})
+		return
+	}
+
+	actions, err := actionService.ListActionInQuestion(questionID, studentID, examID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query actions"})
+		return
+	}
+	c.JSON(http.StatusOK, actions)
+}
