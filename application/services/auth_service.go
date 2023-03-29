@@ -43,7 +43,7 @@ func (as *authService) Login(user *models.User) error {
 		log.Printf("Failed to query user by username: %s", err)
 		return err
 	}
-	bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password))
 	if err != nil {
 		return fmt.Errorf("username or password wrong")
 	}
