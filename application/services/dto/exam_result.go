@@ -1,4 +1,4 @@
-package dtos
+package dto
 
 type ExamResult struct {
 	ExamID    string `json:"exam_id"`
@@ -8,4 +8,3 @@ type ExamResult struct {
 		Answer     string `json:"answer"`
 	} `json:"questions"`
 }
-

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
+	"github.com/liuhdd/exam-cret/application/services/dto"
 	"log"
-	"github.com/liuhdd/exam-cret/application/dtos"
 )
 
 var as *actionService
@@ -90,7 +90,7 @@ func (as *actionService) ListActionInQuestion(examID string, studentID string, q
 	return result, nil
 }
 
-func (as *actionService) ShowExamResult(examID string, studentID string) (*dtos.ExamResult, error) {
+func (as *actionService) ShowExamResult(examID string, studentID string) (*dto.ExamResult, error) {
 	panic("implement me")
 	// actions, err := as.actionRepo.FindActionsByExamAndStudentID(examID, studentID)
 	// if err != nil {
