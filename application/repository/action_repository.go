@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
-	"strconv"
+	"gorm.io/gorm"
 )
 
 type ActionRepository interface {
@@ -16,11 +18,14 @@ type ActionRepository interface {
 	FindActionsByStudentID(string) []*models.ExamAction
 	FindActionsByExamAndStudentID(string, string) ([]*models.ExamAction, error)
 	QueryAction(string) ([]*models.ExamAction, error)
+	GetQuestionAnswer(string, string, string) ([]*models.ExamAction, error)
+	GetAnswersFromDB(string, string) ([]*models.ExamAction, error)
 }
 
 type actionRepository struct {
 	ActionRepository
 	contract *client.Contract
+	db *gorm.DB
 }
 
 var actionRepo *actionRepository
@@ -30,14 +35,20 @@ func NewActionRepository() ActionRepository {
 		return actionRepo
 	}
 	contract := config.GetContract()
-	actionRepo = &actionRepository{contract: contract}
-
+	db := config.GetDB()
+	db.AutoMigrate(&models.ExamAction{})
+	actionRepo = &actionRepository{contract: contract, db: db}
 	return actionRepo
 }
 
 func (a *actionRepository) AddAction(action *models.ExamAction) error {
 	if action == nil {
 		return errors.New("nil point of action")
+	}
+	tx := a.db.Save(action)
+	
+	if tx.Error != nil {
+		return tx.Error
 	}
 	_, err := a.contract.SubmitTransaction("UploadAction",
 		action.ObjectType,
@@ -49,9 +60,12 @@ func (a *actionRepository) AddAction(action *models.ExamAction) error {
 		action.QuestionID,
 		action.Answer,
 	)
+
 	if err != nil {
+		tx.Rollback()
 		return fmt.Errorf("failed to upload action: %s", err)
 	}
+	tx.Commit()	
 	return nil
 
 }
@@ -96,7 +110,7 @@ func (a *actionRepository) FindActionsByStudentID(s string) []*models.ExamAction
 	panic("implement me")
 }
 
-func (a actionRepository) QueryAction(selector string) ([]*models.ExamAction, error) {
+func (a *actionRepository) QueryActionFrom(selector string) ([]*models.ExamAction, error) {
 	bytes, err := a.contract.SubmitTransaction("QueryAction", selector)
 	if err != nil {
 		return nil, err
@@ -107,4 +121,24 @@ func (a actionRepository) QueryAction(selector string) ([]*models.ExamAction, er
 		return nil, err
 	}
 	return actions, nil
+}
+
+func (a *actionRepository) GetAnswersFromDB(examID, studentID string) ([]*models.ExamAction, error) {
+	tx := a.db.Where("exam_id = ? AND student_id = ?", examID, studentID).
+		Group("question_id").
+		Order("action_time desc").
+		Select("question_id, answer").
+		Limit(1).
+		Find(&models.ExamAction{})
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	var actions []*models.ExamAction
+	tx.Scan(&actions)
+	return actions, nil
+}
+
+func (a *actionRepository) GetQuestionAnswer(examID, studentID, questionID string) ([]*models.ExamAction, error) {
+	//TODO implement me
+	panic("implement me")
 }

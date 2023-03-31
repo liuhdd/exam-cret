@@ -92,10 +92,4 @@ func (as *actionService) ListActionInQuestion(examID string, studentID string, q
 
 func (as *actionService) ShowExamResult(examID string, studentID string) (*dto.ExamResult, error) {
 	panic("implement me")
-	// actions, err := as.actionRepo.FindActionsByExamAndStudentID(examID, studentID)
-	// if err != nil {
-	// 	log.Printf("error in find action: %s", err)
-	// 	return nil, err
-	// }
-	// return nil, nil
 }
