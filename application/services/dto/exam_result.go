@@ -9,4 +9,6 @@ type ExamResult struct {
 type QuestionResult struct {
 	QuestionID string `json:"question_id"`
 	Answer     string `json:"answer"`
+	Score	  uint   `json:"score"`
 }
+

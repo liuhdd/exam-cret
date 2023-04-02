@@ -8,6 +8,5 @@ type QuestionActions struct {
 		ActionID   string `json:"action_id"`
 		Answer	 string `json:"answer"`
 		ActionTime int64  `json:"action_time"`
-		ActionType uint   `json:"action_type"`
 	} `json:"actions"`
 }

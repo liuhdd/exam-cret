@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	engine := routes.SetupRoutes()
+	engine := routes.InitEngine()
 	engine.Run()
 }

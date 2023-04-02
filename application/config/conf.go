@@ -31,7 +31,7 @@ func LoadConfig() {
 
 
 func GetRootPath() (root string) {
-	return getCurrentAbPath()
+	return getCurrentAbPath()+"/../"
 }
 
 func getCurrentAbPath() string {

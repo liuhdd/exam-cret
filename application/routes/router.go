@@ -13,12 +13,30 @@ import (
 
 
 var engine *gin.Engine
+var inited bool
 
-func SetupRoutes() *gin.Engine {
-	engine = gin.Default()
+func InitEngine() *gin.Engine {
+	if !inited {
+		engine = gin.Default()
+		SetUpMiddlewares()
+		SetupRoutes()
+	}
+	return engine
+}
+func SetUpMiddlewares() {
+	engine.Use(middlewares.RequestIdMiddleware())
+
+	engine.Use(middlewares.LogMiddleware())
+
 	store := cookie.NewStore([]byte("secret"))
 	engine.Use(sessions.Sessions("session", store))
+
 	engine.Use(middlewares.AuthMiddleware())
+
+}
+
+func SetupRoutes()  {
+	
 	userRepository := repository.NewUserRepository()
 	as := services.NewAuthService(userRepository)
 	ac := controllers.NewAuthController(as)
@@ -35,8 +53,7 @@ func SetupRoutes() *gin.Engine {
 		action.POST("selector", controllers.QueryAction)
 		action.POST("list", controllers.ListActionInQuestion)
 	}
-	
-	return engine
+
 }
 
 
