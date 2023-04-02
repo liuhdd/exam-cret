@@ -18,7 +18,7 @@ type ActionRepository interface {
 	FindActionsByStudentID(string) []*models.ExamAction
 	FindActionsByExamAndStudentID(string, string) ([]*models.ExamAction, error)
 	QueryAction(string) ([]*models.ExamAction, error)
-	GetQuestionAnswer(string, string, string) ([]*models.ExamAction, error)
+	GetQuestionAnswerFromDB(string, string, string) (*models.ExamAction, error)
 	GetAnswersFromDB(string, string) ([]*models.ExamAction, error)
 }
 
@@ -138,7 +138,15 @@ func (a *actionRepository) GetAnswersFromDB(examID, studentID string) ([]*models
 	return actions, nil
 }
 
-func (a *actionRepository) GetQuestionAnswer(examID, studentID, questionID string) ([]*models.ExamAction, error) {
-	//TODO implement me
-	panic("implement me")
+func (a *actionRepository) GetQuestionAnswerFromDB(examID, studentID, questionID string) (*models.ExamAction, error) {
+	tx := a.db.Where("exam_id = ? AND student_id = ? AND question_id = ?", examID, studentID, questionID).
+	Order("action_time desc").
+	Limit(1).
+	Find(&models.ExamAction{})
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	var action models.ExamAction
+	tx.Scan(&action)
+	return &action, nil
 }

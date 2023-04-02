@@ -91,5 +91,21 @@ func (as *actionService) ListActionInQuestion(examID string, studentID string, q
 }
 
 func (as *actionService) ShowExamResult(examID string, studentID string) (*dto.ExamResult, error) {
-	panic("implement me")
+	actions, err := as.actionRepo.GetAnswersFromDB(examID, studentID)
+	if err != nil {
+		log.Printf("error in find action: %s", err)
+		return nil, err
+	}
+	var result []*dto.QuestionResult
+	for _, action := range actions {
+		result = append(result, &dto.QuestionResult{
+			QuestionID: action.QuestionID,
+			Answer:     action.Answer,
+		})
+	}
+	return &dto.ExamResult{
+		ExamID: examID,
+		StudentID: studentID,
+		Questions: result,
+	}, nil
 }
