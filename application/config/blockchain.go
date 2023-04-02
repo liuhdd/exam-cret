@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/hyperledger/fabric-gateway/pkg/identity"
-	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"os"
@@ -25,15 +24,15 @@ type config struct {
 	ChannelName   string `mapstructure:"channelName"`
 }
 
-var c *config
-var v = viper.New()
+
 var contract *client.Contract
+var c *config
 
 func GetContract() *client.Contract {
 	if contract != nil {
 		return contract
 	}
-	loadConfig()
+	initConfig()
 	clientConnection := newGrpcConnection()
 	id := newIdentity()
 	sign := newSign()
@@ -52,18 +51,10 @@ func GetContract() *client.Contract {
 	return contract
 }
 
-func loadConfig() {
-
-	v.SetConfigType("yaml")
-	v.SetConfigFile("app.yaml")
-	err := v.ReadInConfig()
-	v = v.Sub("blockchain")
-
-	if err != nil {
-		panic(err)
-	}
+func initConfig() {
+	vb := v.Sub("blockchain")
 	c = &config{}
-	err = v.Unmarshal(c)
+	err := vb.Unmarshal(c)
 	if err != nil {
 		panic(err)
 	}
@@ -75,7 +66,6 @@ func loadConfig() {
 		c.ChaincodeName = ccname
 	}
 }
-
 func newGrpcConnection() *grpc.ClientConn {
 	certificate, err := loadCertificate(c.TlsCertPath)
 	if err != nil {

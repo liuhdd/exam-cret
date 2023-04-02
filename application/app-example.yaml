@@ -1,0 +1,25 @@
+blockchain:
+  mspID: Org1MSP
+  cryptoPath: /workspaces/exam-cret/blockchain/test-network/organizations/peerOrganizations/org1.example.com
+  certPath: /workspaces/exam-cret/blockchain/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem
+  keyPath: /workspaces/exam-cret/blockchain/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/
+  tlsCertPath: /workspaces/exam-cret/blockchain/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+  peerEndpoint: localhost:7051
+  gatewayPeer: peer0.org1.example.com
+  chaincodeName: examcret
+  channelName: mychannel
+
+
+environment: debug
+
+
+log: 
+  path: ./log
+  level: debug
+
+
+database:
+  type: sqlite
+  username: admin
+  password: adminpwd
+  

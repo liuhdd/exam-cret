@@ -4,17 +4,14 @@ import (
 	"encoding/json"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/stretchr/testify/assert"
-	"os"
 	"testing"
 )
 
-func init() {
-	os.Chdir("/home/liuhd/go/src/github.com/liuhdd/exam-cret/application")
-}
+
 
 func Test_loadConfig(t *testing.T) {
 
-	loadConfig()
+	LoadConfig()
 	assert.NotEmpty(t, c)
 }
 
