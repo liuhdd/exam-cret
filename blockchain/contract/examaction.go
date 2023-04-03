@@ -20,10 +20,12 @@ type ExamAction struct {
 }
 
 type MarkAction struct {
-	ObjectType string `json:"action_type"`
+	ObjectType string `json:"object_type"`
 	ActionID   string `json:"action_id"`
 	ExamID     string `json:"exam_id"`
 	StudentID  string `json:"student_id"`
 	QuestionID string `json:"question_id"`
-	Score      int    `json:"score"`
+	Score	  uint   `json:"score"`
+	Scorer    string `json:"scorer"`
+	ScoredTime int64  `json:"scored_time"`
 }

@@ -10,7 +10,7 @@ type ActionContract struct {
 }
 
 func (sc *ActionContract) UploadAction(ctx ActionContextInterface,
-	objectType string, actionID string, examID string, studentID string, actionType uint,
+    actionID string, examID string, studentID string, actionType uint,
 	time int64, questionID string, answer string) error {
 
 	json, err := ctx.GetStub().GetState(actionID)
@@ -19,7 +19,7 @@ func (sc *ActionContract) UploadAction(ctx ActionContextInterface,
 	}
 
 	action := &ExamAction{
-		ObjectType: objectType,
+		ObjectType: "exam_action",
 		ActionID:   actionID,
 		ExamID:     examID,
 		StudentID:  studentID,
@@ -58,4 +58,47 @@ func (sc *ActionContract) QueryActionByExamAndStudentID(ctx ActionContextInterfa
 }
 func (sc *ActionContract) QueryAction(ctx ActionContextInterface, queryJson string) ([]*ExamAction, error) {
 	return ctx.QueryAction(queryJson)
+}
+
+func (sc *ActionContract) UploadMarkAction(ctx ActionContextInterface,
+    actionID string, examID string, studentID string, questionID string,
+	score uint, time int64, scoreBy string) error {
+
+	json, err := ctx.GetStub().GetState(actionID)
+	if err != nil && len(json) > 0 {
+		return fmt.Errorf("action: %s existed", actionID)
+	}
+
+	action := &MarkAction{
+		ObjectType: "mark_action",
+		ActionID:   actionID,
+		ExamID:     examID,
+		StudentID:  studentID,
+		QuestionID: questionID,
+		Scorer: scoreBy,
+		Score: score,
+		ScoredTime: time,
+	}
+	err = ctx.AddMarkAction(action)
+	if err != nil {
+		return fmt.Errorf("failed to uploead exam action: %s, with error: %s", examID, err)
+	}
+	return nil
+}
+
+func (sc *ActionContract) QueryMarkActionByID(ctx ActionContextInterface, actionID string) (*MarkAction, error) {
+	action, err := ctx.QueryMarkActionByID(actionID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query exam action: %s, with error: %s", actionID, err)
+	}
+	if action == nil {
+		return nil, fmt.Errorf("action not found: %s", actionID)
+	}
+
+	return action, nil
+
+}
+
+func (sc *ActionContext) QuestionScore(ctx ActionContextInterface, examID, studentID, questionID string) (int, error) {
+	return ctx.GetQuestionScore(examID, studentID, questionID)
 }
