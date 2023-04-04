@@ -25,7 +25,7 @@ type ActionRepository interface {
 type actionRepository struct {
 	ActionRepository
 	contract *client.Contract
-	db *gorm.DB
+	db       *gorm.DB
 }
 
 var actionRepo *actionRepository
@@ -46,12 +46,12 @@ func (a *actionRepository) AddAction(action *models.ExamAction) error {
 		return errors.New("nil point of action")
 	}
 	tx := a.db.Save(action)
-	
+
 	if tx.Error != nil {
 		return tx.Error
 	}
 	_, err := a.contract.SubmitTransaction("UploadAction",
-		action.ObjectType,
+		"exam_action",
 		action.ActionID,
 		action.ExamID,
 		action.StudentID,
@@ -65,7 +65,7 @@ func (a *actionRepository) AddAction(action *models.ExamAction) error {
 		tx.Rollback()
 		return fmt.Errorf("failed to upload action: %s", err)
 	}
-	tx.Commit()	
+	tx.Commit()
 	return nil
 
 }
@@ -140,9 +140,9 @@ func (a *actionRepository) GetAnswersFromDB(examID, studentID string) ([]*models
 
 func (a *actionRepository) GetQuestionAnswerFromDB(examID, studentID, questionID string) (*models.ExamAction, error) {
 	tx := a.db.Where("exam_id = ? AND student_id = ? AND question_id = ?", examID, studentID, questionID).
-	Order("action_time desc").
-	Limit(1).
-	Find(&models.ExamAction{})
+		Order("action_time desc").
+		Limit(1).
+		Find(&models.ExamAction{})
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

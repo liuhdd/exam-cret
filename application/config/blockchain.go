@@ -24,7 +24,6 @@ type config struct {
 	ChannelName   string `mapstructure:"channelName"`
 }
 
-
 var contract *client.Contract
 var c *config
 
@@ -52,6 +51,9 @@ func GetContract() *client.Contract {
 }
 
 func initConfig() {
+	if v == nil {
+		LoadConfig()
+	}
 	vb := v.Sub("blockchain")
 	c = &config{}
 	err := vb.Unmarshal(c)

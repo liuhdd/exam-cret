@@ -11,32 +11,35 @@ import (
 	"github.com/spf13/viper"
 )
 
-
-
-var v = viper.New()
-
-
+var v *viper.Viper
 
 func LoadConfig() {
-	
-	v.SetConfigType("yaml")
-	v.SetConfigFile(getCurrentAbPathByCaller()+"/../app.yaml")
+	if v == nil {
+		v = viper.New()
+		v.SetConfigType("yaml")
+		v.SetConfigFile(getCurrentAbPathByCaller() + "/../app.yaml")
 
-	err := v.ReadInConfig()
-	if err != nil {
-		panic(err)
+		err := v.ReadInConfig()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
-
+func GetProperty(k string) string {
+	if k == "" {
+		return ""
+	}
+	return v.GetString(k)
+}
 
 func GetRootPath() (root string) {
-	return getCurrentAbPath()+"/../"
+	return getCurrentAbPath() + "/../"
 }
 
 func getCurrentAbPath() string {
 	dir := getCurrentAbPathByExecutable()
-	if strings.Contains(dir,getTmpDir())  {
+	if strings.Contains(dir, getTmpDir()) {
 		return getCurrentAbPathByCaller()
 	}
 	return dir
@@ -59,7 +62,6 @@ func getCurrentAbPathByExecutable() string {
 	res, _ := filepath.EvalSymlinks(filepath.Dir(exePath))
 	return res
 }
-
 
 func getCurrentAbPathByCaller() string {
 	var abPath string

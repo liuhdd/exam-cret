@@ -1,16 +1,15 @@
 package routes
 
 import (
-	"github.com/liuhdd/exam-cret/application/middlewares"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/controllers"
+	"github.com/liuhdd/exam-cret/application/middlewares"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services"
 )
-
-
 
 var engine *gin.Engine
 var inited bool
@@ -23,10 +22,14 @@ func InitEngine() *gin.Engine {
 	}
 	return engine
 }
+
 func SetUpMiddlewares() {
+
 	engine.Use(middlewares.RequestIdMiddleware())
 
-	engine.Use(middlewares.LogMiddleware())
+	if config.GetProperty("environment") != "debug" {
+		engine.Use(middlewares.LogMiddleware())
+	}
 
 	store := cookie.NewStore([]byte("secret"))
 	engine.Use(sessions.Sessions("session", store))
@@ -35,15 +38,20 @@ func SetUpMiddlewares() {
 
 }
 
-func SetupRoutes()  {
-	
+func SetupRoutes() {
+
 	userRepository := repository.NewUserRepository()
 	as := services.NewAuthService(userRepository)
 	ac := controllers.NewAuthController(as)
+
 	engine.GET("/ping", controllers.Ping)
-	engine.POST("/login", ac.Login)
-	engine.POST("/registry", ac.Register)
-	engine.POST("/logout", ac.Logout)
+
+	user := engine.Group("user")
+	{
+		user.POST("/login", ac.Login)
+		user.POST("/registry", ac.Register)
+		user.POST("/logout", ac.Logout)
+	}
 
 	action := engine.Group("action")
 	{
@@ -54,6 +62,10 @@ func SetupRoutes()  {
 		action.POST("list", controllers.ListActionInQuestion)
 	}
 
+	exam := engine.Group("exam")
+	{
+		exam.POST("result", controllers.ShowExamResult)
+
+	}
+
 }
-
-
