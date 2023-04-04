@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -13,9 +15,12 @@ var selectors map[string]string
 
 func init() {
 	selectors = make(map[string]string)
-	selectors["GetActionByExamAndStudentID"] = "{\n  \"selector\": {\n    \"object_type\": \"%s\",\n   " +
+	selectors["GetActionByExamAndStudentID"] = "{\n  \"selector\": {\n    \"object_type\": \"exam_action\",\n   " +
 		" \"exam_id\": \"%s\",\n    \"student_id\": \"%s\"\n  },\n  \"use_index\": [\"_design/exam_student_index_doc\"," +
 		" \"exam_student_index\"]\n}"
+	selectors["GetQuestionScore"] = "{\n  \"selector\": {\n    \"object_type\": \"mark_action\",\n    \"exam_id\": \"%s\",\n    " +
+		"\"student_id\": \"%s\",\n    \"question_id\": \"%s\"\n  },\n  \"use_index\": [\"_design/mark_index_doc\"," +
+		" \"mark_index\"]\n}"
 
 }
 
@@ -25,10 +30,39 @@ type ActionContextInterface interface {
 	QueryActionByID(actionID string) (*ExamAction, error)
 	GetActionByExamAndStudentID(string, string, string) ([]byte, error)
 	QueryAction(query string) ([]*ExamAction, error)
+	AddMarkAction(action *MarkAction) error
+	QueryMarkActionByID(actionID string) (*MarkAction, error)
+	GetQuestionScore(examID, studentID, questionID string) (int, error)
 }
 
 type ActionContext struct {
 	contractapi.TransactionContext
+}
+
+
+func (ctx *ActionContext) GetQuestionScore(examID, studentID, questionID string) (int, error) {
+	res, err := getQueryResultForQueryString(ctx.GetStub(), fmt.Sprintf(selectors["GetQuestionScore"], examID, studentID, questionID))
+	if err != nil {
+		return -1, err
+	}
+	score, err := strconv.Atoi(res)
+	if err != nil {
+		return -1, err
+	}
+	return score, nil
+}
+
+func (ctx *ActionContext) QueryMarkActionByID(actionID string) (*MarkAction, error) {
+	state, err := ctx.GetStub().GetState(actionID)
+	if err != nil {
+		return nil, err
+	}
+	action := &MarkAction{}
+	err = json.Unmarshal(state, action)
+	if err != nil {
+		return nil, err
+	}
+	return action, nil
 }
 
 func (ctx *ActionContext) AddAction(action *ExamAction) error {
@@ -68,16 +102,16 @@ func (ctx *ActionContext) AddMarkAction(action *MarkAction) error {
 	return nil
 }
 
-func (ctx *ActionContext) GetActionByExamAndStudentID(objectType, examID, studentID string) ([]byte, error) {
+func (ctx *ActionContext) GetActionByExamAndStudentID(objectType, examID, studentID string) (string, error) {
 	if examID == "" || studentID == "" {
-		return nil, errors.New("args miss")
+		return "", errors.New("args miss")
 	}
 	queryString := selectors["GetActionByExamAndStudentID"]
 	actions, err := getQueryResultForQueryString(ctx.GetStub(), fmt.Sprintf(queryString, objectType, examID, studentID))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return []byte(actions), nil
+	return actions, nil
 }
 
 func (ctx *ActionContext) QueryAction(queryJson string) ([]*ExamAction, error) {
@@ -135,3 +169,4 @@ func constructQueryResponseFromIterator(resIterator shim.StateQueryIteratorInter
 	buffer.WriteString("]")
 	return &buffer, nil
 }
+
