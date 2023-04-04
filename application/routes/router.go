@@ -51,21 +51,28 @@ func SetupRoutes() {
 		user.POST("/login", ac.Login)
 		user.POST("/registry", ac.Register)
 		user.POST("/logout", ac.Logout)
+		user.Group("/")
 	}
 
 	action := engine.Group("action")
 	{
-		action.POST("upload", controllers.UploadAction)
-		action.POST("query/:id", controllers.SelectActionById)
-		action.POST("queryByExamAndStudent", controllers.SelectActionByExamAndStudentID)
-		action.POST("selector", controllers.QueryAction)
-		action.POST("list", controllers.ListActionInQuestion)
+		action.POST("/upload", controllers.UploadAction)
+		action.POST("/query/:id", controllers.SelectActionById)
+		action.POST("/queryByExamAndStudent", controllers.SelectActionByExamAndStudentID)
+		action.POST("/selector", controllers.QueryAction)
+		action.POST("/list", controllers.ListActionInQuestion)
 	}
 
 	exam := engine.Group("exam")
 	{
-		exam.POST("result", controllers.ShowExamResult)
+		exam.POST("/view", controllers.ShowExamResult)
+		exam.POST("/verify", controllers.VerifyExamResult)
+	}
 
+	score := engine.Group("score")
+	{
+		score.POST("/query", controllers.GetQuestionScore)
+		score.POST("/upload", controllers.UploadExamScore)
 	}
 
 }

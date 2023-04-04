@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -54,11 +53,10 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	session.Delete("uid")
 	err := session.Save()
 	if err != nil {
-		log.Printf("failed to save session")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to logout."})
 		return
 	}
-
+	c.JSON(http.StatusOK, gin.H{"message": "logout successfully"})
 }
 
 func Ping(c *gin.Context) {

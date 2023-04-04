@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/liuhdd/exam-cret/application/config"
@@ -12,6 +13,8 @@ import (
 type MarkRepository interface {
 	FindMarkByQuestionIDFromDB(string, string, string) (*models.MarkAction, error)
 	FindMarkByQuestionIDFromBC(string, string, string) (*models.MarkAction, error)
+	UploadMarkToDB(mark *models.MarkAction) error
+	UploadMarkToBC(mark *models.MarkAction) error
 }
 
 type markRepository struct {
@@ -24,6 +27,32 @@ func NewMarkRepository() MarkRepository {
 	db.AutoMigrate(&models.MarkAction{})
 	repo := &markRepository{db: db, contract: config.GetContract()}
 	return repo
+}
+
+func (r *markRepository) UploadMarkToDB(mark *models.MarkAction) error {
+	tx := r.db.Create(mark)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
+func (r *markRepository) UploadMarkToBC(mark *models.MarkAction) error {
+	
+	_, err := r.contract.SubmitTransaction(
+		"UploadMarkAction", 
+		mark.ActionID, 
+		mark.ExamID, 
+		mark.StudentID, 
+		mark.QuestionID, 
+		strconv.FormatUint(uint64(mark.Score), 10), 
+		strconv.FormatInt(mark.ScoredTime, 10),
+		 mark.Scorer)
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }
 
 func (r *markRepository) FindMarkByQuestionIDFromDB(examID, studentID, questionID string) (*models.MarkAction, error) {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/services"
 	"github.com/liuhdd/exam-cret/application/services/dto"
 )
@@ -28,3 +29,15 @@ func GetQuestionScore(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, score)
 }
+
+func UploadExamScore(c *gin.Context) {
+	mark := &models.MarkAction{}
+	c.ShouldBind(mark)
+	err := markService.UploadMarkAction(mark)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload score"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "upload score successfully"})
+}
+

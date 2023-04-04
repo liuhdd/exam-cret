@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/liuhdd/exam-cret/application/services"
+	"github.com/liuhdd/exam-cret/application/services/dto"
 )
 
 var examService services.ExamService
@@ -24,4 +25,19 @@ func ShowExamResult(c *gin.Context) {
 		return
 	}
 	c.JSON(200, result)
+}
+
+func VerifyExamResult(c *gin.Context) {
+	var result *dto.ExamResult
+	err := c.ShouldBind(result)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "params illa"})
+		return
+	}
+	process, ok, err := examService.VerifyExamResults(result)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to verify exam result"})
+		return
+	}
+	c.JSON(200, gin.H{"process": process, "correct": ok})
 }
