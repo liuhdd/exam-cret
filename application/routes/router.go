@@ -28,15 +28,15 @@ func InitEngine() *gin.Engine {
 func SetUpMiddlewares() {
 
 	engine.Use(middlewares.RequestIdMiddleware())
+	engine.Use(middlewares.LogMiddleware())
 
 	if config.GetProperty("environment") != "debug" {
-		engine.Use(middlewares.LogMiddleware())
+
+		store := cookie.NewStore([]byte("secret"))
+		engine.Use(sessions.Sessions("session", store))
+		
+		engine.Use(middlewares.AuthMiddleware())
 	}
-
-	store := cookie.NewStore([]byte("secret"))
-	engine.Use(sessions.Sessions("session", store))
-
-	engine.Use(middlewares.AuthMiddleware())
 
 }
 
@@ -48,7 +48,7 @@ func SetupRoutes() {
 
 	engine.GET("/ping", controllers.Ping)
 
-	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handlers))
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	
 	user := engine.Group("user")
 	{

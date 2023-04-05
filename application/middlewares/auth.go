@@ -14,6 +14,7 @@ import (
 var whiteList = map[string]string{
 	"/login":    "POST",
 	"/registry": "POST",
+	"/ping":    "GET",
 }
 
 func withinWhiteList(url *url.URL, method string) bool {
