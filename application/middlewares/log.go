@@ -17,8 +17,10 @@ func LogMiddleware() gin.HandlerFunc {
         method := c.Request.Method
 
         log.WithFields(log.Fields{
+            "client_ip": c.ClientIP(),
             "method": method,
             "path":   path,
+            "user_agent": c.Request.UserAgent(),
         }).Info("request start")
 
         c.Next()

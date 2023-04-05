@@ -17,6 +17,16 @@ func NewAuthController(as services.AuthService) *AuthController {
 	return &AuthController{as}
 }
 
+// Register godoc
+// @Summary Register
+// @Description user register
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param username body string true "username"
+// @Param password body string true "password"
+// @Success 200 {string} string	"register successfully"
+// @Router /user/registry [post]
 func (ac *AuthController) Register(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBind(&user); err != nil {
@@ -31,6 +41,16 @@ func (ac *AuthController) Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
 
+// Login godoc
+// @Summary Login
+// @Description user login
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param username body string true "username"
+// @Param password body string true "password"
+// @Success 200 {string} string	"login successfully"
+// @Router /user/login [post]
 func (ac *AuthController) Login(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -48,6 +68,14 @@ func (ac *AuthController) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "login successfully"})
 }
 
+// Logout godoc
+// @Summary Logout
+// @Description user logout
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string	"logout successfully"
+// @Router /user/logout [post]
 func (ac *AuthController) Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Delete("uid")
@@ -59,6 +87,14 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "logout successfully"})
 }
 
+// Ping godoc
+// @Summary Ping
+// @Description test connection
+// @Tags ping
+// @Accept  all
+// @Produce  json
+// @Success 200 {string} string	"pong"
+// @Router /ping [get]
 func Ping(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "pong"})
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/liuhdd/exam-cret/application/middlewares"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services"
+	"github.com/swaggo/gin-swagger"
+	swaggerfiles "github.com/swaggo/files"
 )
 
 var engine *gin.Engine
@@ -46,6 +48,8 @@ func SetupRoutes() {
 
 	engine.GET("/ping", controllers.Ping)
 
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handlers))
+	
 	user := engine.Group("user")
 	{
 		user.POST("/login", ac.Login)
