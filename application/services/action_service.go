@@ -67,7 +67,7 @@ func (as *actionService) SelectActionByExamAndStudentID(examID string, studentID
 }
 
 func (as *actionService) QueryAction(query string) ([]*models.ExamAction, error) {
-	bytes, err := as.actionRepo.QueryAction(query)
+	bytes, err := as.actionRepo.QueryActionFromBC(query)
 	if err != nil {
 		log.Printf("error in QueryAction: %s", err)
 		return nil, err
@@ -104,7 +104,7 @@ func (as *actionService) ShowExamResult(examID string, studentID string) (*dto.E
 		})
 	}
 	return &dto.ExamResult{
-		ExamID: examID,
+		ExamID:    examID,
 		StudentID: studentID,
 		Questions: result,
 	}, nil

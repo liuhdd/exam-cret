@@ -17,7 +17,7 @@ type ActionRepository interface {
 	FindActionByActionID(string) (*models.ExamAction, error)
 	FindActionsByStudentID(string) []*models.ExamAction
 	FindActionsByExamAndStudentID(string, string) ([]*models.ExamAction, error)
-	QueryAction(string) ([]*models.ExamAction, error)
+	QueryActionFromBC(string) ([]*models.ExamAction, error)
 	GetQuestionAnswerFromDB(string, string, string) (*models.ExamAction, error)
 	GetAnswersFromDB(string, string) ([]*models.ExamAction, error)
 }
@@ -51,7 +51,6 @@ func (a *actionRepository) AddAction(action *models.ExamAction) error {
 		return tx.Error
 	}
 	_, err := a.contract.SubmitTransaction("UploadAction",
-		"exam_action",
 		action.ActionID,
 		action.ExamID,
 		action.StudentID,
@@ -97,8 +96,9 @@ func (a *actionRepository) FindActionsByExamAndStudentID(examID, studentID strin
 	if bytes == nil {
 		return nil, nil
 	}
+	fmt.Println(bytes)
 	var actions []*models.ExamAction
-	err = json.Unmarshal(bytes, actions)
+	err = json.Unmarshal(bytes, &actions)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (a *actionRepository) FindActionsByStudentID(s string) []*models.ExamAction
 	panic("implement me")
 }
 
-func (a *actionRepository) QueryActionFrom(selector string) ([]*models.ExamAction, error) {
+func (a *actionRepository) QueryActionFromBC(selector string) ([]*models.ExamAction, error) {
 	bytes, err := a.contract.SubmitTransaction("QueryAction", selector)
 	if err != nil {
 		return nil, err

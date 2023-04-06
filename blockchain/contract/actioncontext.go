@@ -15,12 +15,10 @@ var selectors map[string]string
 
 func init() {
 	selectors = make(map[string]string)
-	selectors["GetActionByExamAndStudentID"] = "{\n  \"selector\": {\n    \"object_type\": \"exam_action\",\n   " +
-		" \"exam_id\": \"%s\",\n    \"student_id\": \"%s\"\n  },\n  \"use_index\": [\"_design/exam_student_index_doc\"," +
-		" \"exam_student_index\"]\n}"
+	selectors["GetActionByExamAndStudentID"] = "{\n  \"selector\": {\n    \"object_type\": \"%s\",\n   " +
+		" \"exam_id\": \"%s\",\n    \"student_id\": \"%s\"\n  }}"
 	selectors["GetQuestionScore"] = "{\n  \"selector\": {\n    \"object_type\": \"mark_action\",\n    \"exam_id\": \"%s\",\n    " +
-		"\"student_id\": \"%s\",\n    \"question_id\": \"%s\"\n  },\n  \"use_index\": [\"_design/mark_index_doc\"," +
-		" \"mark_index\"]\n}"
+		"\"student_id\": \"%s\",\n    \"question_id\": \"%s\"\n  }}"
 
 }
 
@@ -28,7 +26,7 @@ type ActionContextInterface interface {
 	contractapi.TransactionContextInterface
 	AddAction(action *ExamAction) error
 	QueryActionByID(actionID string) (*ExamAction, error)
-	GetActionByExamAndStudentID(string, string, string) ([]byte, error)
+	GetActionByExamAndStudentID(string, string, string) (string, error)
 	QueryAction(query string) ([]*ExamAction, error)
 	AddMarkAction(action *MarkAction) error
 	QueryMarkActionByID(actionID string) (*MarkAction, error)
@@ -38,7 +36,6 @@ type ActionContextInterface interface {
 type ActionContext struct {
 	contractapi.TransactionContext
 }
-
 
 func (ctx *ActionContext) GetQuestionScore(examID, studentID, questionID string) (int, error) {
 	res, err := getQueryResultForQueryString(ctx.GetStub(), fmt.Sprintf(selectors["GetQuestionScore"], examID, studentID, questionID))
@@ -103,7 +100,7 @@ func (ctx *ActionContext) AddMarkAction(action *MarkAction) error {
 }
 
 func (ctx *ActionContext) GetActionByExamAndStudentID(objectType, examID, studentID string) (string, error) {
-	if examID == "" || studentID == "" {
+	if objectType == "" || examID == "" || studentID == "" {
 		return "", errors.New("args miss")
 	}
 	queryString := selectors["GetActionByExamAndStudentID"]
@@ -169,4 +166,3 @@ func constructQueryResponseFromIterator(resIterator shim.StateQueryIteratorInter
 	buffer.WriteString("]")
 	return &buffer, nil
 }
-

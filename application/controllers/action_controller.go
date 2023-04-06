@@ -47,8 +47,8 @@ func SelectActionById(c *gin.Context) {
 }
 
 func SelectActionByExamAndStudentID(c *gin.Context) {
-	student := c.Query("exam_id")
-	exam := c.Query("student_id")
+	student := c.Query("student_id")
+	exam := c.Query("exam_id")
 	if exam == "" || student == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "miss query params"})
 		return
@@ -77,7 +77,7 @@ func QueryAction(c *gin.Context) {
 }
 
 func ListActionInQuestion(c *gin.Context) {
-	questionID := c.Query("id")
+	questionID := c.Query("question_id")
 	studentID := c.Query("student_id")
 	examID := c.Query("exam_id")
 	if questionID == "" || studentID == "" || examID == "" {
@@ -85,7 +85,7 @@ func ListActionInQuestion(c *gin.Context) {
 		return
 	}
 
-	actions, err := actionService.ListActionInQuestion(questionID, studentID, examID)
+	actions, err := actionService.ListActionInQuestion(examID, studentID, questionID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query actions"})
 		return

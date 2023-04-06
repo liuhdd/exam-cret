@@ -10,7 +10,7 @@ type ActionContract struct {
 }
 
 func (sc *ActionContract) UploadAction(ctx ActionContextInterface,
-    actionID string, examID string, studentID string, actionType uint,
+	actionID string, examID string, studentID string, actionType uint,
 	time int64, questionID string, answer string) error {
 
 	json, err := ctx.GetStub().GetState(actionID)
@@ -48,10 +48,10 @@ func (sc *ActionContract) QueryActionByID(ctx ActionContextInterface,
 
 }
 
-func (sc *ActionContract) QueryActionByExamAndStudentID(ctx ActionContextInterface, objectType, examID, studentID string) ([]byte, error) {
+func (sc *ActionContract) QueryActionByExamAndStudentID(ctx ActionContextInterface, objectType, examID, studentID string) (string, error) {
 	actions, err := ctx.GetActionByExamAndStudentID(objectType, examID, studentID)
 	if err != nil {
-		return nil, fmt.Errorf("error with querying actions: %s", err)
+		return "", fmt.Errorf("error with querying actions: %s", err)
 	}
 	return actions, nil
 
@@ -61,7 +61,7 @@ func (sc *ActionContract) QueryAction(ctx ActionContextInterface, queryJson stri
 }
 
 func (sc *ActionContract) UploadMarkAction(ctx ActionContextInterface,
-    actionID string, examID string, studentID string, questionID string,
+	actionID string, examID string, studentID string, questionID string,
 	score uint, time int64, scoreBy string) error {
 
 	json, err := ctx.GetStub().GetState(actionID)
@@ -75,8 +75,8 @@ func (sc *ActionContract) UploadMarkAction(ctx ActionContextInterface,
 		ExamID:     examID,
 		StudentID:  studentID,
 		QuestionID: questionID,
-		Scorer: scoreBy,
-		Score: score,
+		Scorer:     scoreBy,
+		Score:      score,
 		ScoredTime: time,
 	}
 	err = ctx.AddMarkAction(action)

@@ -35,6 +35,7 @@ func (s *markService) UploadMarkAction(mark *models.MarkAction) error {
 		log.Printf("failed to upload mark to database: %s", err)
 		return err
 	}
+	err = s.markRepo.UploadMarkToBC(mark)
 	if err != nil {
 		log.Printf("failed to upload mark to blockchain: %s", err)
 		return err
@@ -49,6 +50,8 @@ func (s *markService) FindMarkByQuestionID(examID, studentID, questionID string)
 	return &dto.Score{
 		QuestionID: mark.QuestionID,
 		Score:      mark.Score,
+		ScoredBy:   mark.Scorer,
+		ScoredTime: mark.ScoredTime,
 	}, nil
 }
 

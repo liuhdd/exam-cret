@@ -30,7 +30,7 @@ func NewMarkRepository() MarkRepository {
 }
 
 func (r *markRepository) UploadMarkToDB(mark *models.MarkAction) error {
-	tx := r.db.Create(mark)
+	tx := r.db.Save(mark)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -38,27 +38,27 @@ func (r *markRepository) UploadMarkToDB(mark *models.MarkAction) error {
 }
 
 func (r *markRepository) UploadMarkToBC(mark *models.MarkAction) error {
-	
+
 	_, err := r.contract.SubmitTransaction(
-		"UploadMarkAction", 
-		mark.ActionID, 
-		mark.ExamID, 
-		mark.StudentID, 
-		mark.QuestionID, 
-		strconv.FormatUint(uint64(mark.Score), 10), 
+		"UploadMarkAction",
+		mark.ActionID,
+		mark.ExamID,
+		mark.StudentID,
+		mark.QuestionID,
+		strconv.FormatUint(uint64(mark.Score), 10),
 		strconv.FormatInt(mark.ScoredTime, 10),
-		 mark.Scorer)
+		mark.Scorer)
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func (r *markRepository) FindMarkByQuestionIDFromDB(examID, studentID, questionID string) (*models.MarkAction, error) {
 	var mark models.MarkAction
 	tx := r.db.Where("exam_id=? and student_id=? and question_id=?", examID, studentID, questionID).
-		Select("question_id, score, scorer").
+		Select("question_id, score, scorer, scored_time").
 		First(&mark)
 	if tx.Error != nil {
 		return nil, tx.Error
