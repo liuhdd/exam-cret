@@ -124,11 +124,10 @@ func (a *actionRepository) QueryActionFromBC(selector string) ([]*models.ExamAct
 }
 
 func (a *actionRepository) GetAnswersFromDB(examID, studentID string) ([]*models.ExamAction, error) {
-	tx := a.db.Where("exam_id = ? AND student_id = ?", examID, studentID).
+	tx := a.db.Where("exam_id = ? AND student_id = ? ", examID, studentID).
 		Group("question_id").
-		Order("action_time desc").
+		Having("action_time = MAX(action_time)").
 		Select("question_id, answer").
-		Limit(1).
 		Find(&models.ExamAction{})
 	if tx.Error != nil {
 		return nil, tx.Error

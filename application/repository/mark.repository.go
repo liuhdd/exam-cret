@@ -15,6 +15,7 @@ type MarkRepository interface {
 	FindMarkByQuestionIDFromBC(string, string, string) (*models.MarkAction, error)
 	UploadMarkToDB(mark *models.MarkAction) error
 	UploadMarkToBC(mark *models.MarkAction) error
+	GetScores(examID, studentID string) ([]*models.MarkAction, error)
 }
 
 type markRepository struct {
@@ -53,6 +54,19 @@ func (r *markRepository) UploadMarkToBC(mark *models.MarkAction) error {
 	}
 
 	return nil
+}
+
+func (r *markRepository) GetScores(examID, studentID string) ([]*models.MarkAction, error) {
+	var marks []*models.MarkAction
+	tx := r.db.Where("exam_id=? and student_id=?", examID, studentID).
+		Group("question_id").
+		Having("scored_time=Max(scored_time)").
+		Select("question_id, score, scorer").
+		Find(&marks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return marks, tx.Error
 }
 
 func (r *markRepository) FindMarkByQuestionIDFromDB(examID, studentID, questionID string) (*models.MarkAction, error) {

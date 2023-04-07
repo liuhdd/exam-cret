@@ -1,7 +1,6 @@
 package services
 
 import (
-
 	"github.com/liuhdd/exam-cret/application/services/dto"
 	log "github.com/sirupsen/logrus"
 )
@@ -14,13 +13,13 @@ type ExamService interface {
 type examService struct {
 	ExamService
 	actionService ActionService
-	markService MarkService
+	markService   MarkService
 }
 
 func NewExamService() ExamService {
 	return &examService{
 		actionService: NewActionService(),
-		markService: NewMarkService(),
+		markService:   NewMarkService(),
 	}
 }
 
@@ -37,8 +36,21 @@ func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID strin
 			Answer:     action.Answer,
 		})
 	}
+	scores, err := s.markService.GetScores(examID, studentID)
+	if err != nil {
+		log.Printf("%s", err)
+		return nil, err
+	}
+	for _, score := range scores {
+		for _, question := range result {
+			if score.QuestionID == question.QuestionID {
+				question.Score = score.Score
+				break
+			}
+		}
+	}
 	return &dto.ExamResult{
-		ExamID: examID,
+		ExamID:    examID,
 		StudentID: studentID,
 		Questions: result,
 	}, nil
@@ -55,7 +67,7 @@ func (s *examService) VerifyExamResults(result *dto.ExamResult) (*dto.ExamProces
 	}
 
 	process := &dto.ExamProcess{
-		ExamID: examID,
+		ExamID:    examID,
 		StudentID: studentID,
 	}
 
@@ -69,18 +81,18 @@ func (s *examService) VerifyExamResults(result *dto.ExamResult) (*dto.ExamProces
 
 			if res.QuestionID == action.QuestionID {
 				actInfo := &dto.ActionInfo{
-					ActionID: action.ActionID,
-					Answer: action.Answer,
+					ActionID:   action.ActionID,
+					Answer:     action.Answer,
 					ActionTime: action.ActionTime,
 				}
 				qusInfo.Actions = append(qusInfo.Actions, actInfo)
 			}
 		}
-		score, ok, err  := s.markService.VerificationQuestionScore(&dto.Question{
-			ExamID: examID, 
-			StudentID: studentID, 
-			QuestionID: res.QuestionID, 
-			Score: res.Score})
+		score, ok, err := s.markService.VerificationQuestionScore(&dto.Question{
+			ExamID:     examID,
+			StudentID:  studentID,
+			QuestionID: res.QuestionID,
+			Score:      res.Score})
 		if err != nil {
 			log.Error(err)
 			return nil, false, err
@@ -93,6 +105,6 @@ func (s *examService) VerifyExamResults(result *dto.ExamResult) (*dto.ExamProces
 		qusInfo.ScoredTime = score.ScoredTime
 		process.Questions = append(process.Questions, qusInfo)
 	}
-	
+
 	return process, correct, nil
 }

@@ -13,6 +13,7 @@ type MarkService interface {
 	FindMarkByQuestionID(examID, studentID, questionID string) (*dto.Score, error)
 	VerificationQuestionScore(*dto.Question) (*dto.Score, bool, error)
 	UploadMarkAction(mark *models.MarkAction) error
+	GetScores(examID, studentID string) ([]*dto.Score, error)
 }
 
 type markService struct {
@@ -41,6 +42,24 @@ func (s *markService) UploadMarkAction(mark *models.MarkAction) error {
 		return err
 	}
 	return nil
+}
+
+func (s *markService) GetScores(examID, studentID string) ([]*dto.Score, error) {
+	marks, err := s.markRepo.GetScores(examID, studentID)
+	if err != nil {
+		log.Printf("failed to get socres: %s", err)
+		return nil, err
+	}
+	var scores []*dto.Score
+	for _, mark := range marks {
+		scores = append(scores, &dto.Score{
+			QuestionID: mark.QuestionID,
+			Score:      mark.Score,
+			ScoredBy:   mark.Scorer,
+			ScoredTime: mark.ScoredTime,
+		})
+	}
+	return scores, nil
 }
 func (s *markService) FindMarkByQuestionID(examID, studentID, questionID string) (*dto.Score, error) {
 	mark, err := s.markRepo.FindMarkByQuestionIDFromDB(examID, studentID, questionID)
