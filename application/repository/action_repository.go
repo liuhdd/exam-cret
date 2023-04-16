@@ -42,6 +42,10 @@ func NewActionRepository() ActionRepository {
 	return actionRepo
 }
 func (a *actionRepository) AddActions(actions *[]models.ExamAction) error {
+	tx := a.db.Save(actions)
+	if tx.Error != nil {
+		return tx.Error
+	}
 	bytes, _ := json.Marshal(actions)
 	_, err := a.contract.SubmitTransaction("AddExamActions", string(bytes))
 	if err != nil {
