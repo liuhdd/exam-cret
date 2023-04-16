@@ -9,8 +9,8 @@ import (
 	"github.com/liuhdd/exam-cret/application/middlewares"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services"
-	"github.com/swaggo/gin-swagger"
 	swaggerfiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 )
 
 var engine *gin.Engine
@@ -34,7 +34,7 @@ func SetUpMiddlewares() {
 
 		store := cookie.NewStore([]byte("secret"))
 		engine.Use(sessions.Sessions("session", store))
-		
+
 		engine.Use(middlewares.AuthMiddleware())
 	}
 
@@ -49,7 +49,7 @@ func SetupRoutes() {
 	engine.GET("/ping", controllers.Ping)
 
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	
+
 	user := engine.Group("user")
 	{
 		user.POST("/login", ac.Login)
@@ -65,6 +65,7 @@ func SetupRoutes() {
 		action.POST("/queryByExamAndStudent", controllers.SelectActionByExamAndStudentID)
 		action.POST("/selector", controllers.QueryAction)
 		action.POST("/list", controllers.ListActionInQuestion)
+		action.POST("/uploads", controllers.UploadActions)
 	}
 
 	exam := engine.Group("exam")

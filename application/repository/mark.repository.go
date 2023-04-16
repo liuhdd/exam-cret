@@ -81,14 +81,17 @@ func (r *markRepository) FindMarkByQuestionIDFromDB(examID, studentID, questionI
 }
 
 func (r *markRepository) FindMarkByQuestionIDFromBC(examID, studentID, questionID string) (*models.MarkAction, error) {
-	result, err := r.contract.EvaluateTransaction("GetQuestionScore", examID, studentID, questionID)
+	result, err := r.contract.EvaluateTransaction("QuestionScore", examID, studentID, questionID)
 	if err != nil {
 		return nil, err
 	}
-	var mark models.MarkAction
-	err = json.Unmarshal(result, &mark)
+	var marks []*models.MarkAction
+	err = json.Unmarshal(result, &marks)
 	if err != nil {
 		return nil, err
 	}
-	return &mark, nil
+	if len(marks) == 0 {
+		return nil, nil
+	}
+	return marks[0], nil
 }

@@ -28,13 +28,13 @@ func ShowExamResult(c *gin.Context) {
 }
 
 func VerifyExamResult(c *gin.Context) {
-	var result *dto.ExamResult
-	err := c.ShouldBind(result)
+	var result dto.ExamResult
+	err := c.ShouldBind(&result)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "params illa"})
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	process, ok, err := examService.VerifyExamResults(result)
+	process, ok, err := examService.VerifyExamResults(&result)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "failed to verify exam result"})
 		return

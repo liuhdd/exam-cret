@@ -13,6 +13,22 @@ var actionService services.ActionService
 func init() {
 	actionService = services.NewActionService()
 }
+
+func UploadActions(c *gin.Context) {
+	var actions *[]models.ExamAction
+	err := c.ShouldBind(&actions)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	err = actionService.UploadActions(actions)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "actions upload successfully"})
+}
+
 func UploadAction(c *gin.Context) {
 	action := &models.ExamAction{}
 	err := c.ShouldBind(action)

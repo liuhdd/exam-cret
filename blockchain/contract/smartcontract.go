@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -99,6 +100,19 @@ func (sc *ActionContract) QueryMarkActionByID(ctx ActionContextInterface, action
 
 }
 
-func (sc *ActionContext) QuestionScore(ctx ActionContextInterface, examID, studentID, questionID string) (int, error) {
+func (sc *ActionContract) QuestionScore(ctx ActionContextInterface, examID, studentID, questionID string) ([]*MarkAction, error) {
 	return ctx.GetQuestionScore(examID, studentID, questionID)
+}
+
+func (sc *ActionContract) AddExamActions(ctx ActionContextInterface, data string) error {
+	var actions []*ExamAction
+	err := json.Unmarshal([]byte(data), &actions)
+	if err != nil {
+		return err
+	}
+	err = ctx.AddExamActions(actions)
+	if err != nil {
+		return err
+	}
+	return nil
 }

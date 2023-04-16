@@ -20,6 +20,7 @@ type ActionRepository interface {
 	QueryActionFromBC(string) ([]*models.ExamAction, error)
 	GetQuestionAnswerFromDB(string, string, string) (*models.ExamAction, error)
 	GetAnswersFromDB(string, string) ([]*models.ExamAction, error)
+	AddActions(actions *[]models.ExamAction) error
 }
 
 type actionRepository struct {
@@ -40,7 +41,14 @@ func NewActionRepository() ActionRepository {
 	actionRepo = &actionRepository{contract: contract, db: db}
 	return actionRepo
 }
-
+func (a *actionRepository) AddActions(actions *[]models.ExamAction) error {
+	bytes, _ := json.Marshal(actions)
+	_, err := a.contract.SubmitTransaction("AddExamActions", string(bytes))
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func (a *actionRepository) AddAction(action *models.ExamAction) error {
 	if action == nil {
 		return errors.New("nil point of action")
@@ -96,7 +104,7 @@ func (a *actionRepository) FindActionsByExamAndStudentID(examID, studentID strin
 	if bytes == nil {
 		return nil, nil
 	}
-	fmt.Println(bytes)
+	fmt.Println(string(bytes))
 	var actions []*models.ExamAction
 	err = json.Unmarshal(bytes, &actions)
 	if err != nil {

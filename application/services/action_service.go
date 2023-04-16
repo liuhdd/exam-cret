@@ -5,7 +5,7 @@ import (
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services/dto"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 var as *actionService
@@ -16,6 +16,7 @@ type ActionService interface {
 	SelectActionByExamAndStudentID(string, string) ([]*models.ExamAction, error)
 	QueryAction(string) ([]*models.ExamAction, error)
 	ListActionInQuestion(string, string, string) ([]*models.ExamAction, error)
+	UploadActions(actions *[]models.ExamAction) error
 }
 
 type actionService struct {
@@ -45,6 +46,14 @@ func (as *actionService) QueryActionByID(id string) (*models.ExamAction, error) 
 	return action, nil
 }
 
+func (as *actionService) UploadActions(actions *[]models.ExamAction) error {
+	err := as.actionRepo.AddActions(actions)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	return nil
+}
 func (as *actionService) UploadAction(action *models.ExamAction) error {
 	if action == nil {
 		return errors.New("nil pointer to action")

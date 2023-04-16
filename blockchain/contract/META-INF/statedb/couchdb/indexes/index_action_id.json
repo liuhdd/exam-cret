@@ -1,6 +1,6 @@
 {
   "index": {
-    "fields": ["objection_type","action_id"]
+    "fields": ["object_type","action_id"]
   },
   "name": "id_index",
   "ddoc": "id_index_doc",

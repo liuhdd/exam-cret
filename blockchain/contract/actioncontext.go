@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
-
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -30,23 +28,45 @@ type ActionContextInterface interface {
 	QueryAction(query string) ([]*ExamAction, error)
 	AddMarkAction(action *MarkAction) error
 	QueryMarkActionByID(actionID string) (*MarkAction, error)
-	GetQuestionScore(examID, studentID, questionID string) (int, error)
+	GetQuestionScore(examID, studentID, questionID string) ([]*MarkAction, error)
+	AddExamActions(actions []*ExamAction) error
 }
 
 type ActionContext struct {
 	contractapi.TransactionContext
 }
 
-func (ctx *ActionContext) GetQuestionScore(examID, studentID, questionID string) (int, error) {
+func (ctx *ActionContext) AddExamActions(actions []*ExamAction) error {
+	jsons := make([][]byte, 0, len(actions))
+	for _, action := range actions {
+		d, err := json.Marshal(action)
+		if err != nil {
+			return err
+		}
+		jsons = append(jsons, d)
+	}
+
+	for i := 0; i < len(jsons); i++ {
+		err := ctx.GetStub().PutState(actions[i].ActionID, jsons[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (ctx *ActionContext) GetQuestionScore(examID, studentID, questionID string) ([]*MarkAction, error) {
 	res, err := getQueryResultForQueryString(ctx.GetStub(), fmt.Sprintf(selectors["GetQuestionScore"], examID, studentID, questionID))
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	score, err := strconv.Atoi(res)
+	var actions []*MarkAction
+	err = json.Unmarshal([]byte(res), &actions)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	return score, nil
+	return actions, nil
 }
 
 func (ctx *ActionContext) QueryMarkActionByID(actionID string) (*MarkAction, error) {
