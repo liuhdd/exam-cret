@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 import { ElMessage, ElMessageBox } from "element-plus";
-import { localStorage } from "@/utils/storage";
+import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import { useUserStoreHook } from '@/store/models/user'
 
 const service = axios.create({
     baseURL: "http://localhost:8080",
@@ -9,9 +10,11 @@ const service = axios.create({
 });
 
 service.interceptors.request.use(
-    (config: AxiosRequestConfig) => {
-        if (localStorage.getItem('token')) {
-            config.headers['Authorization'] = localStorage.getItem('token');
+    (config: InternalAxiosRequestConfig) => {
+        const userStore = useUserStoreHook()
+
+        if (userStore.token) {
+            config.headers.Authorization = userStore.token
         }
         return config;
     }, (error: any) => {
@@ -21,7 +24,7 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
     (response: AxiosResponse) => {
-        if (response.data.code === 200) {
+        if (response.status === 200) {
             return response.data;
         } else {
             ElMessage({
@@ -30,12 +33,10 @@ service.interceptors.response.use(
             });
             return Promise.reject(response.data.message || 'Error');
         }
-        return response;
-
     }, (error : any) => {
 
-        const { code, msg } = error.response.data
-        if (code === 401) {
+        const { msg } = error.response.data
+        if (error.response.status == 401) {
 
             ElMessageBox.confirm(msg, '提示', {
                 confirmButtonText: '确定',
@@ -43,8 +44,8 @@ service.interceptors.response.use(
                 type: 'warning'
 
             }).then(() => {
-                localStorage.removeItem('token');
-                location.reload();
+                localStorage.clear();
+                window.location.href = '/'
             })
         } else {
             ElMessage({
