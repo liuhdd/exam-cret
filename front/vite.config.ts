@@ -21,7 +21,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   return {
     resolve: {
       alias: {
-        '@': pathSrc
+        '@': pathSrc,
       }
     },
     css: {

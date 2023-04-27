@@ -3,13 +3,13 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { useUserStoreHook } from '@/store/models/user'
 
-const service = axios.create({
+const request = axios.create({
     baseURL: "http://localhost:8080",
     timeout: 5000,
     headers: { 'Content-Type': 'application/json' }
 });
 
-service.interceptors.request.use(
+request.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         const userStore = useUserStoreHook()
 
@@ -22,7 +22,7 @@ service.interceptors.request.use(
     }
 );
 
-service.interceptors.response.use(
+request.interceptors.response.use(
     (response: AxiosResponse) => {
         if (response.status === 200) {
             return response.data;
@@ -57,4 +57,4 @@ service.interceptors.response.use(
     }
 )
 
-export default service;
+export default request;
