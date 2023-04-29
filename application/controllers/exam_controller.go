@@ -16,28 +16,31 @@ func ShowExamResult(c *gin.Context) {
 	studentID := c.Query("student_id")
 	examID := c.Query("exam_id")
 	if examID == "" || studentID == "" {
-		c.JSON(400, gin.H{"error": "miss query params"})
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
 		return
 	}
 	result, err := examService.FindExamResultByExamIDAndStudentID(examID, studentID)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "failed to query exam result"})
+		c.JSON(500, Resp{Code: 1, Msg: "failed to query exam result"})
 		return
 	}
-	c.JSON(200, result)
+	c.JSON(200, Resp{Code: 0, Msg: "success", Data: result})
 }
 
 func VerifyExamResult(c *gin.Context) {
 	var result dto.ExamResult
 	err := c.ShouldBind(&result)
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
 		return
 	}
 	process, ok, err := examService.VerifyExamResults(&result)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "failed to verify exam result"})
+		c.JSON(500, Resp{Code: 1, Msg: "failed to verify exam result"})
 		return
 	}
-	c.JSON(200, gin.H{"process": process, "correct": ok})
+	c.JSON(200, Resp{Code: 0, Msg: "success", Data: map[string]interface{}{
+		"process": process,
+		"ok":      ok,
+	}})
 }

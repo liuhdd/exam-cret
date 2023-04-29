@@ -19,28 +19,28 @@ func GetQuestionScore(c *gin.Context) {
 	studentID := c.Query("student_id")
 	examID := c.Query("exam_id")
 	if questionID == "" || studentID == "" || examID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "params illa"})
+		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "invalid params"})
 		return
 	}
 	score, err := markService.FindMarkByQuestionID(examID, studentID, questionID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query score"})
+		c.JSON(http.StatusInternalServerError, Resp{Code: 1, Msg: "failed to query score"})
 		return
 	}
-	c.JSON(http.StatusOK, score)
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success", Data: score})
 }
 
 func UploadExamScore(c *gin.Context) {
 	mark := &models.MarkAction{}
 	err := c.ShouldBind(mark)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "params illa"})
+		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "invalid params"})
 		return
 	}
 	err = markService.UploadMarkAction(mark)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload score"})
+		c.JSON(http.StatusInternalServerError, Resp{Code: 1, Msg: "failed to upload score"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "upload score successfully"})
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success"})
 }

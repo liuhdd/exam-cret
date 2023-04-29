@@ -30,15 +30,15 @@ func NewAuthController(as services.AuthService) *AuthController {
 func (ac *AuthController) Register(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBind(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "params missed or illegal"})
 		return
 	}
 	err := ac.authService.Register(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.JSON(http.StatusInternalServerError, Resp{Code: 1, Msg: "failed to register"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "register successfully"})
 }
 
 // Login godoc
@@ -54,18 +54,18 @@ func (ac *AuthController) Register(c *gin.Context) {
 func (ac *AuthController) Login(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "params missed or illegal"})
+		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "params missed or illegal"})
 		return
 	}
 	err := ac.authService.Login(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to login. username or password is wrong"})
+		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "failed to login"})
 		return
 	}
 	session := sessions.Default(c)
 	session.Set("uid", user.UserID)
 	session.Save()
-	c.JSON(http.StatusOK, gin.H{"message": "login successfully"})
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success"})
 }
 
 // Logout godoc
@@ -81,10 +81,10 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	session.Delete("uid")
 	err := session.Save()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to logout."})
+		c.JSON(http.StatusInternalServerError, Resp{Code: 1, Msg: "failed to logout"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "logout successfully"})
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success"})
 }
 
 // Ping godoc
@@ -96,5 +96,5 @@ func (ac *AuthController) Logout(c *gin.Context) {
 // @Success 200 {string} string	"pong"
 // @Router /ping [get]
 func Ping(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "pong"})
+	c.JSON(http.StatusOK, "pong")
 }
