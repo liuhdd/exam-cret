@@ -1,6 +1,8 @@
 package services
 
 import (
+	"github.com/liuhdd/exam-cret/application/models"
+	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services/dto"
 	log "github.com/sirupsen/logrus"
 )
@@ -8,10 +10,20 @@ import (
 type ExamService interface {
 	FindExamResultByExamIDAndStudentID(examID, studentID string) (*dto.ExamResult, error)
 	VerifyExamResults(*dto.ExamResult) (*dto.ExamProcess, bool, error)
+	FindExamByID(id string) (*models.Exam, error)
+	FindExamsByStudentID(id string) ([]*models.Exam, error)
+	FindExamsByName(name string) ([]*models.Exam, error)
+	FindExamsByTime(beginTime int64, endTime int64) ([]*models.Exam, error)
+	SaveExam(exam *models.Exam) error
+	FindExamRecordByID(id string) (*models.ExamRecord, error)
+	FindExamRecordsByStudentID(id string) ([]*models.ExamRecord, error)
+	FindExamRecordsByExamID(id string) ([]*models.ExamRecord, error)
+	SaveExamRecord(examRecord *models.ExamRecord) error
+	FindExamRecordsByExamIDAndStudentID(examID string, studentID string) ([]*models.ExamRecord, error)
 }
 
 type examService struct {
-	ExamService
+	examRepo repository.ExamRepository
 	actionService ActionService
 	markService   MarkService
 }
@@ -23,6 +35,45 @@ func NewExamService() ExamService {
 	}
 }
 
+func (s *examService) FindExamByID(id string) (*models.Exam, error) {
+	return s.examRepo.GetExamByID(id)
+}
+
+func (s *examService) FindExamsByName(name string) ([]*models.Exam, error) {
+	return s.examRepo.GetExamsByName(name)
+}
+
+func (s *examService) FindExamsByTime(beginTime int64, endTime int64) ([]*models.Exam, error) {
+	return s.examRepo.GetExamsByTime(beginTime, endTime)
+}
+
+func (s *examService) SaveExam(exam *models.Exam) error {
+	return s.examRepo.SaveExam(exam)
+}
+
+func (s *examService) FindExamRecordByID(id string) (*models.ExamRecord, error) {
+	return s.examRepo.GetExamRecordByID(id)
+}
+
+func (s *examService) FindExamRecordsByStudentID(id string) ([]*models.ExamRecord, error) {
+	return s.examRepo.GetExamRecordsByStudentID(id)
+}
+
+func (s *examService) FindExamRecordsByExamID(id string) ([]*models.ExamRecord, error) {
+	return s.examRepo.GetExamRecordsByExamID(id)
+}
+
+func (s *examService) SaveExamRecord(examRecord *models.ExamRecord) error {
+	return s.examRepo.SaveExamRecord(examRecord)
+}
+
+func (s *examService) FindExamRecordsByExamIDAndStudentID(examID string, studentID string) ([]*models.ExamRecord, error) {
+	return s.examRepo.GetExamRecordsByExamIDAndStudentID(examID, studentID)
+}
+
+func (s *examService) FindExamsByStudentID(id string) ([]*models.Exam, error) {
+	return s.examRepo.GetExamsByStudentID(id)
+}
 func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID string) (*dto.ExamResult, error) {
 	actions, err := as.actionRepo.GetAnswersFromDB(examID, studentID)
 	if err != nil {

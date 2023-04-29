@@ -5,8 +5,3 @@ type User struct {
 	Username string `json:"username" gorm:"unique;not null" form:"username"`
 	Password string `json:"password" gorm:"not null" form:"username"`
 }
-
-type Student struct {
-	User
-	StudentID string `json:"student_id"`
-}
