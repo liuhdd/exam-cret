@@ -1,10 +1,15 @@
 package services
 
 import (
+	"context"
 	"errors"
+	"sync"
+
+	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services/dto"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,15 +27,20 @@ type ActionService interface {
 type actionService struct {
 	AuthService
 	actionRepo repository.ActionRepository
+	cilent    *redis.Client
 }
 
-func NewActionService() ActionService {
-	if as != nil {
-		return as
-	}
+var once sync.Once
 
-	actionRepository := repository.NewActionRepository()
-	as = &actionService{actionRepo: actionRepository}
+func NewActionService() ActionService {
+	once.Do(func() {
+		actionRepository := repository.NewActionRepository()
+		c := config.GetRedisCilent()
+		as = &actionService{
+			actionRepo: actionRepository,
+			cilent:    c,
+		}
+	})
 	return as
 }
 
@@ -58,11 +68,22 @@ func (as *actionService) UploadAction(action *models.ExamAction) error {
 	if action == nil {
 		return errors.New("nil pointer to action")
 	}
-	err := as.actionRepo.AddAction(action)
-	if err != nil {
-		log.Printf("failed to upload action: %s", err)
-		return err
-	}
+	ctx := context.Background()
+	as.cilent.XAdd(ctx, &redis.XAddArgs{
+		Stream: "action",
+		ID:    "*",
+		Values: map[string]interface{}{
+			"object_type": action.ObjectType,
+			"action_id":  action.ActionID,
+			"exam_id":     action.ExamID,
+			"student_id":  action.StudentID,
+			"question_id": action.QuestionID,
+			"answer":     action.Answer,
+			"answer_time": action.ActionTime,
+			"action_type": action.ActionType,
+		},
+	}).Result()
+
 	return nil
 }
 

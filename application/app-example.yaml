@@ -22,4 +22,8 @@ database:
   type: sqlite
   username: admin
   password: adminpwd
-  
+
+redis:
+  addr: localhost:6379
+  password: 
+  db: 0

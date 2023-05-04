@@ -25,6 +25,7 @@ type studentService struct {
 func NewStudentService() StudentService {
 	return &studentService{
 		studentRepo: repository.NewStudentRepository(),
+		db: repository.GetDB(),
 	}
 }
 

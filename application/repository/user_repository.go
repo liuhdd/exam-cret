@@ -6,6 +6,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetDB() *gorm.DB {
+	return config.GetDB()
+}
+
 type UserRepository interface {
 	CreateUser(user *models.User) error
 	FindUserByUserName(username string) (*models.User, error)
