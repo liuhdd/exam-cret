@@ -17,10 +17,12 @@ type StudentService interface {
 	GetStudentByName(name string) ([]*models.Student, error)
 	GetAllStudents() ([]*models.Student, error)
 	UpdateStudent(student *models.Student) error
+	CreateStudent(student *models.Student) error
 }
 
 type studentService struct {
 	db *gorm.DB
+	authService AuthService
 	studentRepo repository.StudentRepository
 }
 
@@ -28,11 +30,36 @@ var s *studentService
 func NewStudentService() StudentService {
 	once.Do(func() {
 		db := config.GetDB()
-		s = &studentService{db: db, studentRepo: repository.NewStudentRepository()}
+		s = &studentService{
+			db: db, 
+			studentRepo: repository.NewStudentRepository(),
+			authService: NewAuthService(repository.NewUserRepository()),
+		}
+
 	})
 	return s
 }
 
+func (s *studentService) CreateStudent(student *models.Student) error {
+	student.Password = "123456"
+	student.UserID = student.StudentID
+	student.Username = student.StudentID
+	u := models.User{
+		UserID:   student.UserID,
+		Username: student.Username,
+		Password: student.Password,
+		Role:    "student",
+	}
+	err := s.authService.Register(&u)
+	if err != nil {
+		return err
+	}
+	tx := s.db.Create(student)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
 func (s *studentService) UpdateStudent(student *models.Student) error {
 	tx := s.db.Save(student)
 	if tx.Error != nil {

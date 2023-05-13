@@ -2,8 +2,8 @@ package models
 
 type Teacher struct {
 	User
-	TeacherID string `json:"teacher_id" gorm:"primary_key" form:"teacher_id"`
+	TeacherID string `json:"teacher_id" gorm:"not null" form:"teacher_id"`
 	Name string `json:"name" gorm:"not null" form:"name"`
-	Gender string `josn:"gender" gorm:"not null" form:"gender"`
+	Gender string `josn:"gender" form:"gender"`
 	Email string `json:"email" form:"email"`
 }

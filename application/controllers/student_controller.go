@@ -20,7 +20,7 @@ func CreateStudent(c *gin.Context) {
 		c.JSON(400, Resp{Code: 1, Msg: "params missed or illegal"})
 		return
 	}
-	err = studentService.SaveStudent(&student)
+	err = studentService.CreateStudent(&student)
 	if err != nil {
 		c.JSON(500, Resp{Code: 1, Msg: err.Error()})
 		return
