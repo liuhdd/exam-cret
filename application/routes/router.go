@@ -81,4 +81,24 @@ func SetupRoutes() {
 		score.POST("/upload", controllers.UploadExamScore)
 	}
 
+	teacher := engine.Group("teacher")
+	{
+		teacher.POST("/create", controllers.CreateTeacher)
+		teacher.GET("/:id", controllers.GetTeacherByID)
+		teacher.GET("/list", controllers.GetAllTeachers)
+		teacher.POST("/update", controllers.UpdateTeacher)
+		teacher.DELETE("/delete/:id", controllers.DeleteTeacher)
+		teacher.GET("/query", controllers.GetTeacherByName)
+	}
+
+	student := engine.Group("student")
+	{
+		student.POST("/create", controllers.CreateStudent)
+		student.GET("/:id", controllers.GetStudentByID)
+		student.GET("/list", controllers.GetAllStudents)
+		student.POST("/update", controllers.UpdateStudent)
+		student.DELETE("/:id", controllers.DeleteStudent)
+		student.GET("/query", controllers.GetStudentByName)
+	}
 }
+
