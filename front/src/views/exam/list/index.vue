@@ -6,7 +6,7 @@
   
 <script lang="ts">
 import ExamResultsTable from "@/components/ExamResultsTable/index.vue"
-
+import { reactive } from "vue";
 
 
 export default {

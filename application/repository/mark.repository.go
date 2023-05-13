@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
@@ -75,6 +76,9 @@ func (r *markRepository) FindMarkByQuestionIDFromDB(examID, studentID, questionI
 		Select("question_id, score, scorer, scored_time").
 		First(&mark)
 	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, tx.Error
 	}
 	return &mark, nil

@@ -66,6 +66,9 @@ func (s *markService) FindMarkByQuestionID(examID, studentID, questionID string)
 	if err != nil {
 		return nil, err
 	}
+	if mark == nil {
+		return nil, nil
+	}
 	return &dto.Score{
 		QuestionID: mark.QuestionID,
 		Score:      mark.Score,
@@ -74,10 +77,13 @@ func (s *markService) FindMarkByQuestionID(examID, studentID, questionID string)
 	}, nil
 }
 
-func (a *markService) VerificationQuestionScore(question *dto.Question) (*dto.Score, bool, error) {
-	mark, err := a.markRepo.FindMarkByQuestionIDFromBC(question.ExamID, question.StudentID, question.QuestionID)
+func (s *markService) VerificationQuestionScore(question *dto.Question) (*dto.Score, bool, error) {
+	mark, err := s.markRepo.FindMarkByQuestionIDFromBC(question.ExamID, question.StudentID, question.QuestionID)
 	if err != nil {
 		return nil, false, err
+	}
+	if mark == nil {
+		return nil, false, nil
 	}
 	socre := &dto.Score{
 		QuestionID: mark.QuestionID,

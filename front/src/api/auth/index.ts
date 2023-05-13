@@ -4,15 +4,15 @@ import type { LoginData, LoginResult } from './types'
 
 export function loginApi(data : LoginData): AxiosPromise<LoginResult> {
     return request({
-        url: '/api/auth/login',
+        url: '/user/login',
         method: 'post',
-        params: data
+        data: data,
     })
 }
 
 export function logoutApi() {
     return request({
-      url: '/api/v1/auth/logout',
+      url: '/user/logout',
       method: 'post'
     });
 }

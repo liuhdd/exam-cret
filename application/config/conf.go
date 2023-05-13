@@ -7,18 +7,24 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/spf13/viper"
 )
 
 var v *viper.Viper
+var onceInit sync.Once
+
+func GetConfig() *viper.Viper {
+	onceInit.Do(LoadConfig)
+	return v
+}
 
 func LoadConfig() {
 	if v == nil {
 		v = viper.New()
 		v.SetConfigType("yaml")
 		v.SetConfigFile(getCurrentAbPathByCaller() + "/../app.yaml")
-
 		err := v.ReadInConfig()
 		if err != nil {
 			panic(err)

@@ -27,6 +27,7 @@ func InitEngine() *gin.Engine {
 
 func SetUpMiddlewares() {
 
+	engine.Use(middlewares.Cors())
 	engine.Use(middlewares.RequestIdMiddleware())
 	engine.Use(middlewares.LogMiddleware())
 
@@ -61,22 +62,22 @@ func SetupRoutes() {
 	action := engine.Group("action")
 	{
 		action.POST("/upload", controllers.UploadAction)
-		action.POST("/query/:id", controllers.SelectActionById)
-		action.POST("/queryByExamAndStudent", controllers.SelectActionByExamAndStudentID)
+		action.GET("/:id", controllers.SelectActionById)
+		action.GET("/list/:exam_id/:student_id", controllers.SelectActionByExamAndStudentID)
 		action.POST("/selector", controllers.QueryAction)
-		action.POST("/list", controllers.ListActionInQuestion)
+		action.GET("/question/:exam_id/:student_id/:question_id", controllers.ListActionInQuestion)
 		action.POST("/uploads", controllers.UploadActions)
 	}
 
 	exam := engine.Group("exam")
 	{
-		exam.POST("/view", controllers.ShowExamResult)
+		exam.GET("/show", controllers.ShowExamResult)
 		exam.POST("/verify", controllers.VerifyExamResult)
 	}
 
 	score := engine.Group("score")
 	{
-		score.POST("/query", controllers.GetQuestionScore)
+		score.GET("/query", controllers.GetQuestionScore)
 		score.POST("/upload", controllers.UploadExamScore)
 	}
 

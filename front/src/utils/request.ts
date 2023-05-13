@@ -35,10 +35,10 @@ request.interceptors.response.use(
         }
     }, (error : any) => {
 
-        const { msg } = error.response.data
+        const { message } = error.response.data
         if (error.response.status == 401) {
 
-            ElMessageBox.confirm(msg, '提示', {
+            ElMessageBox.confirm(message, '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -49,11 +49,11 @@ request.interceptors.response.use(
             })
         } else {
             ElMessage({
-                message: msg,
+                message: message,
                 type: 'error'
             })
         }
-        return Promise.reject(msg || 'Error');
+        return Promise.reject(message || 'Error');
     }
 )
 

@@ -23,7 +23,7 @@ type ExamService interface {
 }
 
 type examService struct {
-	examRepo repository.ExamRepository
+	examRepo      repository.ExamRepository
 	actionService ActionService
 	markService   MarkService
 }
@@ -151,9 +151,12 @@ func (s *examService) VerifyExamResults(result *dto.ExamResult) (*dto.ExamProces
 		if !ok {
 			correct = false
 		}
-		qusInfo.Score = score.Score
-		qusInfo.ScoredBy = score.ScoredBy
-		qusInfo.ScoredTime = score.ScoredTime
+		if score != nil {
+			qusInfo.Score = score.Score
+			qusInfo.ScoredBy = score.ScoredBy
+			qusInfo.ScoredTime = score.ScoredTime
+
+		}
 		process.Questions = append(process.Questions, qusInfo)
 	}
 

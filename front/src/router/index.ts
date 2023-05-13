@@ -27,15 +27,29 @@ export const constantRoutes: Array<RouteRecordRaw> = [
     children: [
       {
         path: "exam",
-        redirect: "/exam/show",
+        redirect: "/exam/list",
         children: [
           {
-            path: "show",
-            component: () => import("@/views/exam/show/index.vue"),
+            path: "list",
+            component: () => import("@/views/exam/list/index.vue"),
+          },
+          {
+            path: "detail/:exam_id/:student_id",
+            component: () => import("@/views/exam/detail/index.vue"),
+            props: true,
           },
           {
             path: "detail",
             component: () => import("@/views/exam/detail/index.vue")
+          },
+          {
+            path: "verify",
+            component: () => import("@/views/exam/verify/index.vue")
+          },
+          {
+            path: "verify/:examID/:studentID",
+            component: () => import("@/views/exam/verify/index.vue"),
+            props: true
           }
         ]
       }, 

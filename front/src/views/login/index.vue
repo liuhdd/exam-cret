@@ -174,7 +174,6 @@ function handleLogin() {
           router.push({ path: redirect, query: otherQueryParams });
         })
         .catch(() => {
-          // 验证失败，重新生成验证码
           
         })
         .finally(() => {

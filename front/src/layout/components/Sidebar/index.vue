@@ -29,15 +29,22 @@ const route = useRoute();
             <svg-icon icon-class="user" />
             考试管理
           </template>
-          <app-link to="/exam/show">
-            <el-menu-item index="/show" teleported>
+          <app-link to="/exam/list">
+            <el-menu-item index="/list" teleported>
               <span>
-                结果查询
+                考试查询
               </span>
             </el-menu-item>
           </app-link>
+          <app-link to="/exam/detail">
+            <el-menu-item index="/detail" teleported>
+              <span>
+                考试详情
+              </span>
+              </el-menu-item>
+          </app-link>
           <app-link to="/exam/verify">
-            <el-menu-item index="/show" teleported>
+            <el-menu-item index="/verify" teleported>
               <span>
                 结果核验
               </span>

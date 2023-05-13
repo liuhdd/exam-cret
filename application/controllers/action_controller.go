@@ -38,7 +38,7 @@ func UploadAction(c *gin.Context) {
 	}
 	err = actionService.UploadAction(action)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,Resp{Code: 1, Msg: "failed to upload"})
+		c.JSON(http.StatusInternalServerError, Resp{Code: 1, Msg: "failed to upload"})
 		return
 	}
 	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success"})
@@ -63,8 +63,8 @@ func SelectActionById(c *gin.Context) {
 }
 
 func SelectActionByExamAndStudentID(c *gin.Context) {
-	student := c.Query("student_id")
-	exam := c.Query("exam_id")
+	student := c.Param("student_id")
+	exam := c.Param("exam_id")
 	if exam == "" || student == "" {
 		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "invalid params"})
 		return
@@ -78,8 +78,8 @@ func SelectActionByExamAndStudentID(c *gin.Context) {
 }
 
 func QueryAction(c *gin.Context) {
-	query, err := c.GetRawData()
-	if err != nil {
+	query, _ := c.GetRawData()
+	if query == nil {
 		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "invalid params"})
 		return
 	}
@@ -93,9 +93,9 @@ func QueryAction(c *gin.Context) {
 }
 
 func ListActionInQuestion(c *gin.Context) {
-	questionID := c.Query("question_id")
-	studentID := c.Query("student_id")
-	examID := c.Query("exam_id")
+	questionID := c.Param("question_id")
+	studentID := c.Param("student_id")
+	examID := c.Param("exam_id")
 	if questionID == "" || studentID == "" || examID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid params"})
 		return

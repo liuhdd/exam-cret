@@ -27,7 +27,7 @@ type ActionService interface {
 type actionService struct {
 	AuthService
 	actionRepo repository.ActionRepository
-	cilent    *redis.Client
+	client     *redis.Client
 }
 
 var once sync.Once
@@ -35,10 +35,10 @@ var once sync.Once
 func NewActionService() ActionService {
 	once.Do(func() {
 		actionRepository := repository.NewActionRepository()
-		c := config.GetRedisCilent()
+		c := config.GetRedisClient()
 		as = &actionService{
 			actionRepo: actionRepository,
-			cilent:    c,
+			client:     c,
 		}
 	})
 	return as
@@ -69,16 +69,16 @@ func (as *actionService) UploadAction(action *models.ExamAction) error {
 		return errors.New("nil pointer to action")
 	}
 	ctx := context.Background()
-	as.cilent.XAdd(ctx, &redis.XAddArgs{
+	as.client.XAdd(ctx, &redis.XAddArgs{
 		Stream: "action",
-		ID:    "*",
+		ID:     "*",
 		Values: map[string]interface{}{
 			"object_type": action.ObjectType,
-			"action_id":  action.ActionID,
+			"action_id":   action.ActionID,
 			"exam_id":     action.ExamID,
 			"student_id":  action.StudentID,
 			"question_id": action.QuestionID,
-			"answer":     action.Answer,
+			"answer":      action.Answer,
 			"answer_time": action.ActionTime,
 			"action_type": action.ActionType,
 		},

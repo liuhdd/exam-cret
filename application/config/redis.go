@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"sync"
 
 	"github.com/redis/go-redis/v9"
@@ -8,20 +9,20 @@ import (
 
 var once sync.Once
 
-var cilent *redis.Client
+var redisClient *redis.Client
 
-func GetRedisCilent() *redis.Client{
-
+func GetRedisClient() *redis.Client {
+	conf := GetConfig()
 	once.Do(func() {
-		conf := v.Sub("redis")
-		cilent = redis.NewClient(&redis.Options{
+		conf := conf.Sub("redis")
+		redisClient = redis.NewClient(&redis.Options{
 			Addr:     conf.GetString("addr"),
-			Password: conf.GetString("password"), 
+			Password: conf.GetString("password"),
 			DB:       conf.GetInt("db"),
 		})
-		
+		ctx := context.Background()
+		redisClient.XGroupCreate(ctx, "action", "g1", "$").Result()
 	})
 
-	return cilent
+	return redisClient
 }
-
