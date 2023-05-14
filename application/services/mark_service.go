@@ -4,9 +4,11 @@ import (
 	"errors"
 	"log"
 
+	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services/dto"
+	"gorm.io/gorm"
 )
 
 type MarkService interface {
@@ -18,12 +20,14 @@ type MarkService interface {
 
 type markService struct {
 	MarkService
+	db	   *gorm.DB
 	markRepo repository.MarkRepository
 }
 
 func NewMarkService() MarkService {
 	markRepo := repository.NewMarkRepository()
-	return &markService{markRepo: markRepo}
+	db := config.GetDB()
+	return &markService{markRepo: markRepo, db: db}
 }
 
 func (s *markService) UploadMarkAction(mark *models.MarkAction) error {
@@ -36,11 +40,18 @@ func (s *markService) UploadMarkAction(mark *models.MarkAction) error {
 		log.Printf("failed to upload mark to database: %s", err)
 		return err
 	}
+	
 	err = s.markRepo.UploadMarkToBC(mark)
 	if err != nil {
 		log.Printf("failed to upload mark to blockchain: %s", err)
 		return err
 	}
+	s.db.Save(&models.Mark{
+		ExamID:    mark.ExamID,
+		StudentID: mark.StudentID,
+		QuestionID: mark.QuestionID,
+		Score:    mark.Score,
+	})
 	return nil
 }
 

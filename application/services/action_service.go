@@ -73,7 +73,7 @@ func (as *actionService) UploadAction(action *models.ExamAction) error {
 		Stream: "action",
 		ID:     "*",
 		Values: map[string]interface{}{
-			"object_type": action.ObjectType,
+			"object_type": "exam_action",
 			"action_id":   action.ActionID,
 			"exam_id":     action.ExamID,
 			"student_id":  action.StudentID,
@@ -83,7 +83,13 @@ func (as *actionService) UploadAction(action *models.ExamAction) error {
 			"action_type": action.ActionType,
 		},
 	}).Result()
-
+	db := config.GetDB()
+	db.Save(&models.Mark{
+		ExamID:    action.ExamID,
+		StudentID: action.StudentID,
+		QuestionID:  action.QuestionID,
+		Answer:     action.Answer,
+	})
 	return nil
 }
 

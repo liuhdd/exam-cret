@@ -1,10 +1,12 @@
 package services
 
 import (
+	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/liuhdd/exam-cret/application/services/dto"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type ExamService interface {
@@ -19,20 +21,43 @@ type ExamService interface {
 	FindExamRecordsByStudentID(id string) ([]*models.ExamRecord, error)
 	FindExamRecordsByExamID(id string) ([]*models.ExamRecord, error)
 	SaveExamRecord(examRecord *models.ExamRecord) error
-	FindExamRecordsByExamIDAndStudentID(examID string, studentID string) ([]*models.ExamRecord, error)
+	FindExamRecordByExamIDAndStudentID(examID string, studentID string) (*models.ExamRecord, error)
+	SaveQuestion(question *models.Question) error
+	FindQuestionByID(id string) (*models.Question, error)
 }
 
 type examService struct {
 	examRepo      repository.ExamRepository
 	actionService ActionService
 	markService   MarkService
+	db			*gorm.DB
 }
 
 func NewExamService() ExamService {
 	return &examService{
 		actionService: NewActionService(),
 		markService:   NewMarkService(),
+		db: config.GetDB(),
 	}
+}
+
+func (s *examService) FindQuestionByID(id string) (*models.Question, error) {
+	var question models.Question
+	tx := s.db.Where("question_id=?", id).First(&question)
+	if tx.Error != nil {
+		log.Error(tx.Error)
+		return nil, tx.Error
+	}
+	return &question, nil
+}
+
+func (s *examService) SaveQuestion(question *models.Question) error {
+	tx := s.db.Save(question)
+	if tx.Error != nil {
+		log.Error(tx.Error)
+		return tx.Error
+	}
+	return nil
 }
 
 func (s *examService) FindExamByID(id string) (*models.Exam, error) {
@@ -67,45 +92,47 @@ func (s *examService) SaveExamRecord(examRecord *models.ExamRecord) error {
 	return s.examRepo.SaveExamRecord(examRecord)
 }
 
-func (s *examService) FindExamRecordsByExamIDAndStudentID(examID string, studentID string) ([]*models.ExamRecord, error) {
-	return s.examRepo.GetExamRecordsByExamIDAndStudentID(examID, studentID)
+func (s *examService) FindExamRecordByExamIDAndStudentID(examID string, studentID string) (*models.ExamRecord, error) {
+	return s.examRepo.GetExamRecordByExamIDAndStudentID(examID, studentID)
 }
 
 func (s *examService) FindExamsByStudentID(id string) ([]*models.Exam, error) {
 	return s.examRepo.GetExamsByStudentID(id)
 }
 func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID string) (*dto.ExamResult, error) {
-	actions, err := as.actionRepo.GetAnswersFromDB(examID, studentID)
-	if err != nil {
-		log.Printf("error in find action: %s", err)
-		return nil, err
-	}
+	
 	var result []*dto.QuestionResult
-	for _, action := range actions {
-		result = append(result, &dto.QuestionResult{
-			QuestionID: action.QuestionID,
-			Answer:     action.Answer,
-		})
+	tx := s.db.Raw("select mark.question_id as question_id, content, answer, mark.score as score" +
+	"from mark left join question on mark.question_id = question.question_id" +
+	"where exam_id = ? and student_id = ?", examID, studentID).
+	Scan(&result)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
-	scores, err := s.markService.GetScores(examID, studentID)
-	if err != nil {
-		log.Printf("%s", err)
-		return nil, err
+
+	var exam models.Exam
+	tx = s.db.Where("exam_id=?", examID).First(&exam)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
-	for _, score := range scores {
-		for _, question := range result {
-			if score.QuestionID == question.QuestionID {
-				question.Score = score.Score
-				break
-			}
-		}
+
+	var examRecord models.ExamRecord
+	tx = s.db.Where("exam_id=? and student_id=?", examID, studentID).First(&examRecord)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return &dto.ExamResult{
 		ExamID:    examID,
 		StudentID: studentID,
+		ExamName: exam.ExamName,
+		BeginTime: exam.BeginTime,
+		EndTime: exam.EndTime,
+		Grade: examRecord.Grade,
+		Score: examRecord.Score,
 		Questions: result,
 	}, nil
 }
+
 
 func (s *examService) VerifyExamResults(result *dto.ExamResult) (*dto.ExamProcess, bool, error) {
 	examID := result.ExamID

@@ -26,7 +26,7 @@ type ExamRepository interface {
 
 	SaveExamRecord(examRecord *models.ExamRecord) error
 
-	GetExamRecordsByExamIDAndStudentID(examID string, studentID string) ([]*models.ExamRecord, error)
+	GetExamRecordByExamIDAndStudentID(examID string, studentID string) (*models.ExamRecord, error)
 }
 
 type examRepository struct {
@@ -37,6 +37,8 @@ type examRepository struct {
 func NewExamRepository() ExamRepository {
 	db := config.GetDB()
 	db.AutoMigrate(&models.Exam{})
+	db.AutoMigrate(&models.ExamRecord{})
+	db.AutoMigrate(&models.Question{})
 	repo := &examRepository{db: db}
 	return repo
 }
@@ -120,8 +122,8 @@ func (r *examRepository) SaveExamRecord(examRecord *models.ExamRecord) error {
 	return nil
 }
 
-func (r *examRepository) GetExamRecordsByExamIDAndStudentID(examID string, studentID string) ([]*models.ExamRecord, error) {
-	var examRecords []*models.ExamRecord
+func (r *examRepository) GetExamRecordByExamIDAndStudentID(examID string, studentID string) (*models.ExamRecord, error) {
+	var examRecords *models.ExamRecord
 	tx := r.db.Where("exam_id=? and student_id=?", examID, studentID).Find(&examRecords)
 	if tx.Error != nil {
 		return nil, tx.Error

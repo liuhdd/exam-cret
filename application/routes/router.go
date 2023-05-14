@@ -96,4 +96,10 @@ func SetupRoutes() {
 		student.DELETE("/:id", controllers.DeleteStudent)
 		student.GET("/query", controllers.GetStudentByName)
 	}
+
+	question := engine.Group("question")
+	{
+		question.POST("/create", controllers.CreateQuestion)
+		question.GET("/:id", controllers.GetQuestionByID)
+	}
 }

@@ -27,6 +27,7 @@ type markRepository struct {
 func NewMarkRepository() MarkRepository {
 	db := config.GetDB()
 	db.AutoMigrate(&models.MarkAction{})
+	db.AutoMigrate(&models.Mark{})
 	repo := &markRepository{db: db, contract: config.GetContract()}
 	return repo
 }
