@@ -22,22 +22,20 @@ request.interceptors.request.use(
     }
 );
 
+
 request.interceptors.response.use(
     (response: AxiosResponse) => {
+        const { code, data, message } = response.data
         if (response.status === 200) {
-            return response.data;
+            return data;
         } else {
-            ElMessage({
-                message: response.data.message,
-                type: 'error'
-            });
-            return Promise.reject(response.data.message || 'Error');
+            ElMessage.error(code, message)
+            return Promise.reject(message || 'Error');
         }
     }, (error : any) => {
 
         const { message } = error.response.data
         if (error.response.status == 401) {
-
             ElMessageBox.confirm(message, '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -49,7 +47,7 @@ request.interceptors.response.use(
             })
         } else {
             ElMessage({
-                message: message,
+                message: message || 'Error',
                 type: 'error'
             })
         }

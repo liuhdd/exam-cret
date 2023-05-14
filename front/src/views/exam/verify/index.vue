@@ -75,6 +75,7 @@ interface Questions{
   scored_time: number
   actions: Actions
 }
+
 interface Actions{
   action_id: string
   answer: string

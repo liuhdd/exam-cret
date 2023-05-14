@@ -5,9 +5,10 @@ import { loginApi, logoutApi} from '@/api/auth'
 import type { LoginData } from "@/api/auth/types"
 
 export const useUserStore = defineStore('user', () => {
-    const nickname = ref('')
+    const name = ref('')
     const token = ref('')
     const avatar = ref('');
+    const role = ref('')
     function login(loginData : LoginData) {
         return new Promise<void>((resolve, reject) => {
             loginApi(loginData).then(response => {
@@ -32,10 +33,10 @@ export const useUserStore = defineStore('user', () => {
     }
     function resetToken() {
         token.value = ''
-        nickname.value = ''
+        name.value = ''
     }
     return {
-        nickname,
+        name,
         token,
         avatar,
         login,

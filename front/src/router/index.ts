@@ -5,6 +5,10 @@ export const Layout = () => import("@/layout/index.vue");
 
 export const constantRoutes: Array<RouteRecordRaw> = [
   {
+    path: "/test",
+    component: () => import("@/views/test/index.vue"),
+  },
+  {    
     path: "/redirect",
     component: Layout,
     meta: { hidden: true },
@@ -53,6 +57,20 @@ export const constantRoutes: Array<RouteRecordRaw> = [
           }
         ]
       }, 
+      {
+      path: "user",
+      redirect: "/user/list",
+      children: [
+        {
+          path: "student",
+          component: import("@/views/user/student/index.vue"),
+        },
+        {
+          path: "teacher",
+          component: import("@/views/user/teacher/index.vue"),
+        },
+      ]
+      },
       {
         path: "dashboard",
         component: () => import("@/views/dashboard/index.vue"),

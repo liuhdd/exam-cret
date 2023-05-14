@@ -24,6 +24,33 @@ const route = useRoute();
       <el-menu :default-active="route.path" :collapse="!appStore.sidebar.opened" :background-color="variables.menuBg"
         :text-color="variables.menuText" :active-text-color="variables.menuActiveText" :unique-opened="false"
         :collapse-transition="false" mode="vertical">
+        <el-sub-menu index="user">
+          <template #title>
+            <svg-icon icon-class="user" />
+            用户管理
+          </template>
+          <app-link to="/user/list">
+            <el-menu-item index="/list" teleported>
+              <span>
+                用户查询
+              </span>
+            </el-menu-item>
+          </app-link>
+          <app-link to="/user/student">
+            <el-menu-item index="/student" teleported>
+              <span>
+                考生管理
+              </span>
+            </el-menu-item>
+          </app-link>
+          <app-link to="/user/teacher">
+            <el-menu-item index="/teacher" teleported>
+              <span>
+                教师管理
+              </span>
+            </el-menu-item>
+          </app-link>
+        </el-sub-menu>
         <el-sub-menu index="exam">
           <template #title>
             <svg-icon icon-class="user" />
@@ -39,14 +66,14 @@ const route = useRoute();
           <app-link to="/exam/detail">
             <el-menu-item index="/detail" teleported>
               <span>
-                考试详情
+                成绩查询
               </span>
-              </el-menu-item>
+            </el-menu-item>
           </app-link>
           <app-link to="/exam/verify">
             <el-menu-item index="/verify" teleported>
               <span>
-                结果核验
+                成绩核验
               </span>
             </el-menu-item>
           </app-link>
