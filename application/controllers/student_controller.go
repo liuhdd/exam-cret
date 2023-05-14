@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/services"
+	log "github.com/sirupsen/logrus"
 )
-
 
 var studentService services.StudentService
 
@@ -16,6 +16,7 @@ func init() {
 func CreateStudent(c *gin.Context) {
 	var student models.Student
 	err := c.ShouldBindJSON(&student)
+	log.Debug(student)
 	if err != nil {
 		c.JSON(400, Resp{Code: 1, Msg: "params missed or illegal"})
 		return

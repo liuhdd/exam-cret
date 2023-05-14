@@ -7,8 +7,6 @@ import (
 	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/controllers"
 	"github.com/liuhdd/exam-cret/application/middlewares"
-	"github.com/liuhdd/exam-cret/application/repository"
-	"github.com/liuhdd/exam-cret/application/services"
 	swaggerfiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 )
@@ -43,9 +41,7 @@ func SetUpMiddlewares() {
 
 func SetupRoutes() {
 
-	userRepository := repository.NewUserRepository()
-	as := services.NewAuthService(userRepository)
-	ac := controllers.NewAuthController(as)
+	ac := controllers.NewAuthController()
 
 	engine.GET("/ping", controllers.Ping)
 
@@ -87,7 +83,7 @@ func SetupRoutes() {
 		teacher.GET("/:id", controllers.GetTeacherByID)
 		teacher.GET("/list", controllers.GetAllTeachers)
 		teacher.POST("/update", controllers.UpdateTeacher)
-		teacher.DELETE("/delete/:id", controllers.DeleteTeacher)
+		teacher.DELETE("/:id", controllers.DeleteTeacher)
 		teacher.GET("/query", controllers.GetTeacherByName)
 	}
 
@@ -101,4 +97,3 @@ func SetupRoutes() {
 		student.GET("/query", controllers.GetStudentByName)
 	}
 }
-

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -13,8 +14,18 @@ type AuthController struct {
 	authService services.AuthService
 }
 
-func NewAuthController(as services.AuthService) *AuthController {
-	return &AuthController{as}
+var once sync.Once
+var controller *AuthController
+
+func NewAuthController() *AuthController {
+	if controller == nil {
+		once.Do(func() {
+			controller = &AuthController{
+				authService: services.NewAuthService(),
+			}
+		})
+	}
+	return controller
 }
 
 // Register godoc

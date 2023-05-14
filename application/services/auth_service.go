@@ -1,11 +1,15 @@
 package services
 
 import (
+	"context"
 	"fmt"
+	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"sync"
 )
 
 type AuthService interface {
@@ -13,12 +17,24 @@ type AuthService interface {
 	Login(user *models.User) error
 }
 
+var auth *authService
+
 type authService struct {
 	repo repository.UserRepository
+	rdb  *redis.Client
 }
 
-func NewAuthService(repo repository.UserRepository) AuthService {
-	return &authService{repo}
+var ao sync.Once
+
+func NewAuthService() AuthService {
+	ao.Do(func() {
+		auth = &authService{
+			repo: repository.NewUserRepository(),
+			rdb:  config.GetRedisClient(),
+		}
+	})
+
+	return auth
 }
 
 func (as *authService) Register(user *models.User) error {
@@ -46,6 +62,18 @@ func (as *authService) Login(user *models.User) error {
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password))
 	if err != nil {
 		return fmt.Errorf("username or password wrong")
+	}
+	if user.Role == "student" {
+		ss := NewStudentService()
+		stu, err := ss.GetStudentByID(user.UserID)
+		if err != nil {
+			return err
+		}
+
+		err = as.rdb.HSet(context.Background(), stu.UserID, stu).Err()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
