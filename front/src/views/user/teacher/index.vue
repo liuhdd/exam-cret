@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="app-container">
         <el-card width="100%">
             <el-form :inline="true">
                 <el-form-item label="职工号">
@@ -37,7 +37,7 @@
 
         <el-dialog v-model="dialogVisible" title="新增教师">
             <el-form ref="formRef" :model="addForm" :rules="rules" label-width="80px" style="width: 400px">
-                <el-form-item label="职工号" prop="student_id">
+                <el-form-item label="职工号" prop="teacher_id">
                     <el-input v-model.lazy="addForm.teacher_id"></el-input>
                 </el-form-item>
                 <el-form-item label="姓名" prop="name">
@@ -76,8 +76,8 @@ const teachers = ref()
 
 function getTeachers() {
     getAllTeacherApi().then(res => {
-        teachers.value = res
-        filteredTeachers.value = res
+        teachers.value = res.data
+        filteredTeachers.value = res.data
     })
 }
 onMounted(() => {

@@ -71,7 +71,7 @@ func (s *studentService) UpdateStudent(student *models.Student) error {
 		return errors.New("missing id")
 	}
 	var stu *models.Student
-	s.db.Where("id = ?", id).Scan(stu)
+	s.db.Where("student_id = ?", id).Find(&stu)
 	if stu == nil {
 		return gorm.ErrRecordNotFound
 	}

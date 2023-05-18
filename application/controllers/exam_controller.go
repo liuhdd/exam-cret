@@ -13,6 +13,76 @@ func init() {
 	examService = services.NewExamService()
 }
 
+func ListExams(c *gin.Context) {
+	exams := examService.ListExams()
+	c.JSON(200, Resp{Code: 0, Msg: "success", Data: exams})
+}
+func QueryGrades(c *gin.Context) {
+	var exam *models.ExamRecord
+	err := c.ShouldBind(&exam)
+	if err != nil {
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+	grades := examService.QueryGrades(exam)
+	c.JSON(200, Resp{Code: 0, Msg: "success", Data: grades})
+}
+func GetGradesByStudent(c *gin.Context) {
+	studentID := c.Param("student_id")
+	if studentID == "" {
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+	grades, err := examService.GetGradesByStudentID(studentID)
+	if err != nil {
+		c.JSON(500, Resp{Code: 1, Msg: "failed to query"})
+		return
+	}
+	c.JSON(200, Resp{Code: 0, Msg: "success", Data: grades})
+}
+
+func QueryExams(c *gin.Context) {
+	var exam models.Exam
+	err := c.ShouldBind(&exam)
+	if err != nil {
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+
+	exams := examService.QueryExam(c, &exam)
+	c.JSON(200, Resp{Code: 0, Msg: "success", Data: exams})
+}
+
+func DeleteExam(c *gin.Context) {
+	examId := c.Param("id")
+	if examId == "" {
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+
+	err := examService.DeleteExam(examId)
+	if err != nil {
+		c.JSON(500, Resp{Code: 1, Msg: "failed to delete"})
+		return
+	}
+	c.JSON(200, Resp{Code: 0, Msg: "success"})
+}
+
+func CreateExam(c *gin.Context) {
+	var exam models.Exam
+	err := c.ShouldBind(&exam)
+	if err != nil {
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+
+	err = examService.SaveExam(&exam)
+	if err != nil {
+		c.JSON(500, Resp{Code: 1, Msg: "failed to create"})
+		return
+	}
+	c.JSON(200, Resp{Code: 0, Msg: "success"})
+}
 
 func GetQuestionByID(c *gin.Context) {
 	id := c.Param("id")
@@ -22,7 +92,7 @@ func GetQuestionByID(c *gin.Context) {
 	}
 	question, err := examService.FindQuestionByID(id)
 	if err != nil {
-		c.JSON(500, Resp{Code: 1, Msg: "failed to query question"})
+		c.JSON(500, Resp{Code: 1, Msg: "failed to query"})
 		return
 	}
 	c.JSON(200, Resp{Code: 0, Msg: "success", Data: question})

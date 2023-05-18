@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="app-container">
         <el-card width="100%">
             <el-form :inline="true">
                 <el-form-item label="学号">
@@ -75,9 +75,9 @@ import { FormInstance } from 'element-plus';
 const students = ref()
 
 function getStudents() {
-    getAllStudentApi().then(res => {
-        students.value = res
-        filteredStudents.value = res
+    getAllStudentApi().then(({data}) => {
+        students.value = data
+        filteredStudents.value = data
     })
 }
 onMounted(() => {

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
@@ -24,21 +25,82 @@ type ExamService interface {
 	FindExamRecordByExamIDAndStudentID(examID string, studentID string) (*models.ExamRecord, error)
 	SaveQuestion(question *models.Question) error
 	FindQuestionByID(id string) (*models.Question, error)
+	DeleteExam(id string) error
+	GetGradesByStudentID(studentID string) ([]*dto.Grade, error)
+	ListExams() []*models.Exam
+	QueryExam(c *gin.Context, exam *models.Exam) []*models.Exam
+	QueryGrades(exam *models.ExamRecord) []*dto.Grade
 }
 
 type examService struct {
 	examRepo      repository.ExamRepository
 	actionService ActionService
 	markService   MarkService
-	db			*gorm.DB
+	db            *gorm.DB
 }
 
 func NewExamService() ExamService {
 	return &examService{
+		examRepo:      repository.NewExamRepository(),
 		actionService: NewActionService(),
 		markService:   NewMarkService(),
-		db: config.GetDB(),
+		db:            config.GetDB(),
 	}
+}
+
+func (s *examService) QueryGrades(exam *models.ExamRecord) []*dto.Grade {
+	var grades []*dto.Grade
+
+	sub1 := s.db.Table("exam_records").Where(exam).Select("*")
+
+	s.db.Table("(?) as er, students s, exams e", sub1).Where("er.student_id = s.student_id and er.exam_id = e.exam_id").
+		Select("er.exam_id as exam_id, e.exam_name as exam_name, er.student_id as student_id, " +
+			"s.name as student_name,  er.grade as grade").Scan(&grades)
+	return grades
+}
+func (s *examService) ListExams() []*models.Exam {
+	var exams []*models.Exam
+	s.db.Find(&exams)
+	return exams
+}
+
+func (s *examService) GetGradesByStudentID(studentID string) ([]*dto.Grade, error) {
+	var grades []*dto.Grade
+	tx := s.db.Raw("select er.exam_id as exam_id, e.exam_name as exam_name, er.student_id as student_id,"+
+		" s.name as student_name, er.grade as grade"+
+		" from exam_records er, students s, exams e "+
+		"where er.student_id = ? and er.student_id = s.student_id and er.exam_id = e.exam_id",
+		studentID).Scan(&grades)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return grades, nil
+}
+
+func (s *examService) QueryExam(c *gin.Context, exam *models.Exam) (exams []*models.Exam) {
+
+	get, exists := c.Get("user")
+	if exists {
+		if user, ok := get.(models.User); ok {
+			if user.Role == "student" {
+				s.db.Raw("select * from exams where exam_id in "+
+					"(select exam_id from exam_records where student_id = ?)", user.Username).Scan(exams)
+				return
+			}
+		}
+
+	}
+	s.db.Table("exams").Where(exam).Scan(&exams)
+	return
+}
+
+func (s *examService) DeleteExam(id string) error {
+	tx := s.db.Where("exam_id = ?", id).Delete(&models.Exam{})
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }
 
 func (s *examService) FindQuestionByID(id string) (*models.Question, error) {
@@ -100,12 +162,12 @@ func (s *examService) FindExamsByStudentID(id string) ([]*models.Exam, error) {
 	return s.examRepo.GetExamsByStudentID(id)
 }
 func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID string) (*dto.ExamResult, error) {
-	
+
 	var result []*dto.QuestionResult
-	tx := s.db.Raw("select mark.question_id as question_id, content, answer, mark.score as score" +
-	"from mark left join question on mark.question_id = question.question_id" +
-	"where exam_id = ? and student_id = ?", examID, studentID).
-	Scan(&result)
+	tx := s.db.Raw("select marks.question_id as question_id, content, marks.answer as answer, marks.score as score "+
+		"from marks left join questions on marks.question_id = questions.question_id "+
+		"where exam_id = ? and student_id = ?", examID, studentID).
+		Scan(&result)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -124,15 +186,13 @@ func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID strin
 	return &dto.ExamResult{
 		ExamID:    examID,
 		StudentID: studentID,
-		ExamName: exam.ExamName,
+		ExamName:  exam.ExamName,
 		BeginTime: exam.BeginTime,
-		EndTime: exam.EndTime,
-		Grade: examRecord.Grade,
-		Score: examRecord.Score,
+		EndTime:   exam.EndTime,
+		Grade:     examRecord.Grade,
 		Questions: result,
 	}, nil
 }
-
 
 func (s *examService) VerifyExamResults(result *dto.ExamResult) (*dto.ExamProcess, bool, error) {
 	examID := result.ExamID

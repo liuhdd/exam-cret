@@ -19,7 +19,7 @@ export interface LoginData {
     /**
      * 访问token
      */
-    accessToken?: string;
+    token?: string;
     /**
      * 过期时间(单位：毫秒)
      */
@@ -32,5 +32,12 @@ export interface LoginData {
      * token 类型
      */
     tokenType?: string;
+
+    role:string;
   }
   
+  export interface User {
+    user_id: string;
+    username: string;
+    role: string;
+  }

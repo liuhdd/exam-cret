@@ -4,16 +4,16 @@ import (
 	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"gorm.io/gorm"
+	"sync"
 )
 
 type ExamRepository interface {
-	
 	GetExamByID(id string) (*models.Exam, error)
-	
+
 	GetExamsByStudentID(id string) ([]*models.Exam, error)
-	
+
 	GetExamsByName(name string) ([]*models.Exam, error)
-	
+
 	GetExamsByTime(beginTime int64, endTime int64) ([]*models.Exam, error)
 
 	SaveExam(exam *models.Exam) error
@@ -30,17 +30,23 @@ type ExamRepository interface {
 }
 
 type examRepository struct {
-	
 	db *gorm.DB
 }
 
+var epOnce sync.Once
+var ep *examRepository
+
+func init() {
+	epOnce.Do(func() {
+		db := config.GetDB()
+		db.AutoMigrate(&models.Exam{})
+		db.AutoMigrate(&models.ExamRecord{})
+		db.AutoMigrate(&models.Question{})
+		ep = &examRepository{db: db}
+	})
+}
 func NewExamRepository() ExamRepository {
-	db := config.GetDB()
-	db.AutoMigrate(&models.Exam{})
-	db.AutoMigrate(&models.ExamRecord{})
-	db.AutoMigrate(&models.Question{})
-	repo := &examRepository{db: db}
-	return repo
+	return ep
 }
 
 func (r *examRepository) GetExamByID(id string) (*models.Exam, error) {

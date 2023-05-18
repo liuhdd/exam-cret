@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="app-container">
         <el-card width="100%">
             <el-form :inline="true">
                 <el-form-item label="用户名">
@@ -54,18 +54,20 @@
 
 <script setup lang="ts">
 import { Student } from '@/api/student/types';
-import { getAllStudentApi, createStudentApi, updateStudentApi, deleteStudentApi } from '@/api/student/index';
+import { listUserApi, deleteUserApi } from '@/api/auth';
 import { FormInstance } from 'element-plus';
+import { User } from '@/api/auth/types';
 
-const students = ref()
+const users = ref()
 
 function getStudents() {
-    getAllStudentApi().then(res => {
-        students.value = res
-        filteredUsers.value = res
+    listUserApi().then(res => {
+        users.value = res.data
+        filteredUsers.value = res.data
     })
 }
 onMounted(() => {
+    alert()
     getStudents()
 })
 
@@ -73,27 +75,26 @@ onMounted(() => {
 const username = ref('')
 const filteredUsers = ref()
 function handleSearch() {
-    filteredUsers.value = students.value.filter((student: Student) => {
-        return student.student_id.includes(username.value)
+    filteredUsers.value = users.value.filter((user: User) => {
+        return user.username.includes(username.value)
     })
 }
-var operate = 0
+
 
 function handleEdit(row: Student) {
     addForm.value = row
     dialogVisible.value = true
-    operate = 1
 }
 
-function handleDelete(row: Student) {
-    deleteStudentApi(row.user_id).then(res => {
+function handleDelete(row: User) {
+    deleteUserApi(row.username).then(res => {
         getStudents()
     })
 }
 
 function handleAdd() {
     dialogVisible.value = true
-    operate = 0
+
 }
 
 // 表单
@@ -117,15 +118,7 @@ function addFormSubmit(formEl: FormInstance | undefined) {
     if (!formEl) return
     formEl.validate((valid) => {
         if (valid) {
-            if (operate == 0) {
-                createStudentApi(addForm.value).then(res => {
-                    getStudents()
-                })
-            } else {
-                updateStudentApi(addForm.value).then(res => {
-                    getStudents()
-                })
-            }
+            
             dialogVisible.value = false
             addForm.value = {} as Student
         } else {

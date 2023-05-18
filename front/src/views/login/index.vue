@@ -63,11 +63,11 @@
         >{{ $t("login.login") }}
       </el-button>
 
-      <!-- 账号密码提示 -->
+      <!-- 账号密码提示
       <div class="mt-4 text-white text-sm">
         <span>{{ $t("login.username") }}: admin</span>
         <span class="ml-4"> {{ $t("login.password") }}: 123456</span>
-      </div>
+      </div> -->
     </el-form>
   </div>
 </template>
@@ -127,7 +127,7 @@ const loginRules = {
  * 密码校验器
  */
 function passwordValidator(rule: any, value: any, callback: any) {
-  if (value.length < 6) {
+  if (value.length < 1) {
     callback(new Error("The password can not be less than 6 digits"));
   } else {
     callback();

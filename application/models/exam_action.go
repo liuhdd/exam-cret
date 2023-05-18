@@ -2,7 +2,7 @@ package models
 
 type ExamAction struct {
 	ObjectType string `json:"object_type"`
-	ActionID   string `json:"action_id" gorm:"primary_key"`
+	ActionID   string `json:"action_id" gorm:"primaryKey"`
 	ExamID     string `json:"exam_id" gorm:"not null"`
 	StudentID  string `json:"student_id" gorm:"not null"`
 	ActionType uint   `json:"action_type" gorm:"not null"`

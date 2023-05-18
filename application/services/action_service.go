@@ -84,12 +84,16 @@ func (as *actionService) UploadAction(action *models.ExamAction) error {
 		},
 	}).Result()
 	db := config.GetDB()
-	db.Save(&models.Mark{
-		ExamID:    action.ExamID,
-		StudentID: action.StudentID,
-		QuestionID:  action.QuestionID,
-		Answer:     action.Answer,
-	})
+	mark := models.Mark{
+		ExamID:     action.ExamID,
+		StudentID:  action.StudentID,
+		QuestionID: action.QuestionID,
+	}
+	db.Table("marks").Where("exam_id = ? and student_id = ? and question_id = ?",
+		action.ExamID, action.StudentID, action.QuestionID).Select("score").
+		Scan(&mark)
+	mark.Answer = action.Answer
+	db.Save(&mark)
 	return nil
 }
 

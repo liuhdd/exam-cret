@@ -10,6 +10,7 @@ export function getStudentByIdApi(student_id: string) :AxiosPromise<Student> {
     })
 }
 
+
 export function getStudentByNameApi(name: string) :AxiosPromise<Student> {
     return request({
         url: `student/query`,

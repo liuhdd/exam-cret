@@ -68,15 +68,15 @@ func (ac *AuthController) Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "params missed or illegal"})
 		return
 	}
-	err := ac.authService.Login(&user)
+	token, err := ac.authService.Login(&user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "failed to login"})
 		return
 	}
-	session := sessions.Default(c)
-	session.Set("uid", user.UserID)
-	session.Save()
-	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success"})
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success", Data: map[string]string{
+		"token": token,
+		"role":  user.Role,
+	}})
 }
 
 // Logout godoc
@@ -95,6 +95,17 @@ func (ac *AuthController) Logout(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, Resp{Code: 1, Msg: "failed to logout"})
 		return
 	}
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success"})
+}
+
+func (ac *AuthController) ListUsers(c *gin.Context) {
+	users := ac.authService.ListUsers()
+	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success", Data: users})
+}
+
+func (ac *AuthController) DeleteUser(c *gin.Context) {
+	username := c.Param("username")
+	ac.authService.DeleteUser(username)
 	c.JSON(http.StatusOK, Resp{Code: 0, Msg: "success"})
 }
 

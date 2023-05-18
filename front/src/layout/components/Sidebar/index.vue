@@ -8,11 +8,8 @@ import { useSettingsStore } from '@/store/models/settings';
 import { useAppStore } from '@/store/models/app';
 import { storeToRefs } from 'pinia';
 import variables from '@/styles/variables.module.scss';
-import { dynamicRoutes } from '@/router/index'
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
-
-const routes = dynamicRoutes
 const { sidebarLogo } = storeToRefs(settingsStore);
 const route = useRoute();
 </script>
@@ -51,7 +48,7 @@ const route = useRoute();
             </el-menu-item>
           </app-link>
         </el-sub-menu>
-        <el-sub-menu index="exam">
+        <el-sub-menu index="/exam">
           <template #title>
             <svg-icon icon-class="user" />
             考试管理
@@ -74,6 +71,33 @@ const route = useRoute();
             <el-menu-item index="/verify" teleported>
               <span>
                 成绩核验
+              </span>
+            </el-menu-item>
+          </app-link>
+        </el-sub-menu>
+        <el-sub-menu index="/system">
+          <template #title>
+            <svg-icon icon-class="user" />
+            系统管理
+          </template>
+          <app-link to="/system/backup">
+            <el-menu-item index="/role" teleported>
+              <span>
+                数据备份
+              </span>
+            </el-menu-item>
+          </app-link>
+          <app-link to="/system/permission">
+            <el-menu-item index="/permission" teleported>
+              <span>
+                权限管理
+              </span>
+            </el-menu-item>
+          </app-link>
+          <app-link to="/system/log">
+            <el-menu-item index="/log" teleported>
+              <span>
+                日志管理
               </span>
             </el-menu-item>
           </app-link>

@@ -52,7 +52,16 @@ func SetupRoutes() {
 		user.POST("/login", ac.Login)
 		user.POST("/registry", ac.Register)
 		user.POST("/logout", ac.Logout)
+		user.GET("/list", ac.ListUsers)
+		user.DELETE("/:username", ac.DeleteUser)
 		user.Group("/")
+	}
+
+	system := engine.Group("system")
+	{
+		system.POST("/resume", controllers.DataResume)
+		system.POST("/resume/confirm", controllers.ConfirmResume)
+		system.GET("/backup", controllers.BackupData)
 	}
 
 	action := engine.Group("action")
@@ -67,8 +76,14 @@ func SetupRoutes() {
 
 	exam := engine.Group("exam")
 	{
+		exam.POST("/create", controllers.CreateExam)
 		exam.GET("/show", controllers.ShowExamResult)
 		exam.POST("/verify", controllers.VerifyExamResult)
+		exam.DELETE("/:id", controllers.DeleteExam)
+		exam.GET("/grade/:student_id", controllers.GetGradesByStudent)
+		exam.GET("/list", controllers.ListExams)
+		exam.POST("/query", controllers.QueryExams)
+		exam.POST("/grades", controllers.QueryGrades)
 	}
 
 	score := engine.Group("score")

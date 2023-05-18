@@ -2,18 +2,19 @@ import { defineStore } from "pinia"
 import { ref } from 'vue'
 import { store } from '@/store'
 import { loginApi, logoutApi} from '@/api/auth'
-import type { LoginData } from "@/api/auth/types"
+import type { LoginData, LoginResult } from "@/api/auth/types"
 
 export const useUserStore = defineStore('user', () => {
-    const name = ref('')
-    const token = ref('')
-    const avatar = ref('');
-    const role = ref('')
+    const username = ref('')
+    const token = useStorage('accessToken', '')
+    const avatar = ref('')
+    const role = useStorage('role', '')
     function login(loginData : LoginData) {
+        username.value = loginData.username
         return new Promise<void>((resolve, reject) => {
-            loginApi(loginData).then(response => {
-                const { tokenType, accessToken } = response.data
-                token.value = tokenType + ' ' + accessToken
+            loginApi(loginData).then(({data})=> {
+                token.value = data.token
+                role.value = data.role
                 resolve()
             }).catch(error => {
                 reject(error)
@@ -33,12 +34,13 @@ export const useUserStore = defineStore('user', () => {
     }
     function resetToken() {
         token.value = ''
-        name.value = ''
+        username.value = ''
     }
     return {
-        name,
+        username,
         token,
         avatar,
+        role,
         login,
         logout
     }

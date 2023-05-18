@@ -25,9 +25,9 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
     (response: AxiosResponse) => {
-        const { code, data, message } = response.data
-        if (response.status === 200) {
-            return data;
+        const { code, message } = response.data
+        if (code == 0) {
+            return response.data;
         } else {
             ElMessage.error(code, message)
             return Promise.reject(message || 'Error');

@@ -3,18 +3,21 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/repository"
 	"github.com/redis/go-redis/v9"
-	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"log"
 	"sync"
 )
 
 type AuthService interface {
 	Register(user *models.User) error
-	Login(user *models.User) error
+	Login(user *models.User) (string, error)
+	ListUsers() []*models.User
+	DeleteUser(username string)
 }
 
 var auth *authService
@@ -22,6 +25,11 @@ var auth *authService
 type authService struct {
 	repo repository.UserRepository
 	rdb  *redis.Client
+	db   *gorm.DB
+}
+
+func (as *authService) DeleteUser(username string) {
+	as.db.Where("username = ?", username).Delete(&models.User{})
 }
 
 var ao sync.Once
@@ -31,20 +39,20 @@ func NewAuthService() AuthService {
 		auth = &authService{
 			repo: repository.NewUserRepository(),
 			rdb:  config.GetRedisClient(),
+			db:   config.GetDB(),
 		}
 	})
 
 	return auth
 }
-
+func (as *authService) ListUsers() []*models.User {
+	var users []*models.User
+	as.db.Find(&users)
+	return users
+}
 func (as *authService) Register(user *models.User) error {
-	hashedPasswd, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("Failed to hash password: %s", err)
-		return err
-	}
-	user.Password = string(hashedPasswd)
-	err = as.repo.CreateUser(user)
+
+	err := as.repo.CreateUser(user)
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 		return err
@@ -52,28 +60,29 @@ func (as *authService) Register(user *models.User) error {
 	return nil
 }
 
-func (as *authService) Login(user *models.User) error {
+func (as *authService) Login(user *models.User) (string, error) {
 
 	u, err := as.repo.FindUserByUserName(user.Username)
 	if err != nil {
 		log.Printf("Failed to query user by username: %s", err)
-		return err
+		return "", err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(user.Password))
-	if err != nil {
-		return fmt.Errorf("username or password wrong")
+	if u.Password != user.Password {
+		return "", fmt.Errorf("username or password wrong")
 	}
-	if user.Role == "student" {
+	user.Role = u.Role
+	token := uuid.New().String()
+	if u.Role == "student" {
 		ss := NewStudentService()
-		stu, err := ss.GetStudentByID(user.UserID)
+		stu, err := ss.GetStudentByID(user.Username)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		err = as.rdb.HSet(context.Background(), stu.UserID, stu).Err()
+		err = as.rdb.HSet(context.Background(), token, stu).Err()
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
-	return nil
+	return token, nil
 }

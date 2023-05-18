@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
@@ -20,7 +20,7 @@ type MarkService interface {
 
 type markService struct {
 	MarkService
-	db	   *gorm.DB
+	db       *gorm.DB
 	markRepo repository.MarkRepository
 }
 
@@ -40,17 +40,30 @@ func (s *markService) UploadMarkAction(mark *models.MarkAction) error {
 		log.Printf("failed to upload mark to database: %s", err)
 		return err
 	}
-	
+
 	err = s.markRepo.UploadMarkToBC(mark)
 	if err != nil {
 		log.Printf("failed to upload mark to blockchain: %s", err)
 		return err
 	}
-	s.db.Save(&models.Mark{
+	m := models.Mark{
+		ExamID:     mark.ExamID,
+		StudentID:  mark.StudentID,
+		QuestionID: mark.QuestionID,
+	}
+	s.db.Table("marks").Where("exam_id = ? and student_id = ? and question_id = ?",
+		m.ExamID, m.StudentID, m.QuestionID).Select("answer").
+		Scan(&m)
+	m.Score = mark.Score
+	s.db.Save(&m)
+	var grade int
+	s.db.Table("marks").
+		Select("SUM(score) as grade").Where("exam_id = ? and student_id = ?", mark.ExamID, mark.StudentID).
+		Scan(&grade)
+	s.db.Save(&models.ExamRecord{
 		ExamID:    mark.ExamID,
 		StudentID: mark.StudentID,
-		QuestionID: mark.QuestionID,
-		Score:    mark.Score,
+		Grade:     grade,
 	})
 	return nil
 }
