@@ -30,6 +30,7 @@ type ExamService interface {
 	ListExams() []*models.Exam
 	QueryExam(c *gin.Context, exam *models.Exam) []*models.Exam
 	QueryGrades(exam *models.ExamRecord) []*dto.Grade
+	CreateQuestions(questions []*models.Question) error
 }
 
 type examService struct {
@@ -37,6 +38,11 @@ type examService struct {
 	actionService ActionService
 	markService   MarkService
 	db            *gorm.DB
+}
+
+func (s *examService) CreateQuestions(questions []*models.Question) error {
+	tx := s.db.Save(questions)
+	return tx.Error
 }
 
 func NewExamService() ExamService {
@@ -164,7 +170,7 @@ func (s *examService) FindExamsByStudentID(id string) ([]*models.Exam, error) {
 func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID string) (*dto.ExamResult, error) {
 
 	var result []*dto.QuestionResult
-	tx := s.db.Raw("select marks.question_id as question_id, content, marks.answer as answer, marks.score as score "+
+	tx := s.db.Raw("select marks.question_id as question_id, question_type, content, options marks.answer as answer, marks.score as score "+
 		"from marks left join questions on marks.question_id = questions.question_id "+
 		"where exam_id = ? and student_id = ?", examID, studentID).
 		Scan(&result)

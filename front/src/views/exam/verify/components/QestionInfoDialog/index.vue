@@ -17,6 +17,12 @@
         <template #label><span>得分</span></template>
         {{ question.score }}
       </el-descriptions-item>
+      <!-- <el-descriptions-item v-if="question.type=='1'"
+        v-for="option in question.options"
+      >
+        <template #label>选项</template>
+        {{ option }}
+      </el-descriptions-item> -->
     </el-descriptions>
 
     <el-collapse>
@@ -38,7 +44,7 @@
 <script setup lang="ts">
 import { listActionsApi } from '@/api/action'
 const props = defineProps(['question', 'student_id', 'exam_id', 'display'])
-const emit = defineEmits(['update:display', 'update:question'])
+const emit = defineEmits(['update:display', 'update:question','update:student_id','update:exam_id'])
 const student_id = props.student_id
 const exam_id = props.exam_id
 const showDialog = ref(false)

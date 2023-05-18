@@ -90,6 +90,7 @@ func SetupRoutes() {
 	{
 		score.GET("/query", controllers.GetQuestionScore)
 		score.POST("/upload", controllers.UploadExamScore)
+		score.POST("/import", controllers.UploadExamScores)
 	}
 
 	teacher := engine.Group("teacher")
@@ -110,10 +111,12 @@ func SetupRoutes() {
 		student.POST("/update", controllers.UpdateStudent)
 		student.DELETE("/:id", controllers.DeleteStudent)
 		student.GET("/query", controllers.GetStudentByName)
+		student.POST("/import", controllers.CreateStudents)
 	}
 
 	question := engine.Group("question")
 	{
+		question.POST("/import", controllers.CreateQuestions)
 		question.POST("/create", controllers.CreateQuestion)
 		question.GET("/:id", controllers.GetQuestionByID)
 	}

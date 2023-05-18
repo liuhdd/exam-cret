@@ -87,7 +87,7 @@ onMounted(() => {
       ></li>
     </ul>
 
-    <el-divider>导航设置</el-divider>
+    <!-- <el-divider>导航设置</el-divider>
 
     <ul class="layout">
       <el-tooltip content="左侧模式" placement="bottom">
@@ -126,7 +126,7 @@ onMounted(() => {
           <div />
         </li>
       </el-tooltip>
-    </ul>
+    </ul> -->
   </div>
 </template>
 

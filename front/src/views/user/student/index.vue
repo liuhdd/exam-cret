@@ -9,14 +9,51 @@
                     <el-input v-model="name" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="handleSearch">
-                        查询
-                    </el-button>
+                    <el-form-item><el-button type="primary" :icon="Search"
+                            @click="handleSearch">搜索</el-button></el-form-item>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="handleAdd">添加</el-button>
+                    <el-button type="primary" @click="handleImport">导入</el-button>
                 </el-form-item>
             </el-form>
-            <el-button type="primary" @click="handleAdd">新增</el-button>
+            <el-dialog v-model="dialogImportVisible" title="导入考生">
+                <el-card>
+                    <template #header>
+                        <div class="card-header">
+                        
+                            <el-upload width="50%" ref="upload" class="upload-demo" action="" :limit="1" :auto-upload="false"
+                                accept=".xlsx,.xls" :on-preview="fileChange" :on-exceed="handleExceed">
+                                <template #trigger>
+                                    <el-button type="primary">选择学生信息文件</el-button>
+                                </template>
+                                
+                                
+                            </el-upload>
+                            <el-button class="button" type="success">导入</el-button>
+                        </div>
+                    </template>
+
+                    <el-table :data="importStudents">
+                        <el-table-column prop="student_id" label="学号">
+                        </el-table-column>
+                        <el-table-column prop="name" label="姓名">
+                        </el-table-column>
+                        <el-table-column prop="gender" label="性别">
+                        </el-table-column>
+                        <el-table-column prop="email" label="邮箱">
+                        </el-table-column>
+                        <el-table-column prop="phone" label="电话">
+                        </el-table-column>
+                    </el-table>
+                </el-card>
+            </el-dialog>
+
+
+
+            <el-divider></el-divider>
             <el-table :data="filteredStudents">
-                <el-table-column prop="user_id" label="学号">
+                <el-table-column prop="student_id" label="学号">
                 </el-table-column>
                 <el-table-column prop="name" label="姓名">
                 </el-table-column>
@@ -26,8 +63,9 @@
                 </el-table-column>
                 <el-table-column prop="phone" label="电话">
                 </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="操作" width="220">
                     <template #default="{ row }">
+                        <el-button type="primary" size="small" @click="handleCheck(row)">查看考试</el-button>
                         <el-button type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
                         <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
                     </template>
@@ -70,12 +108,16 @@
 <script setup lang="ts">
 import { Student } from '@/api/student/types';
 import { getAllStudentApi, createStudentApi, updateStudentApi, deleteStudentApi } from '@/api/student/index';
-import { FormInstance } from 'element-plus';
-
+import { ElDialog, ElMessageBox, FormInstance, UploadFile, UploadInstance, UploadProps, UploadRawFile, genFileId } from 'element-plus';
+import router from '@/router';
+import { Search } from '@element-plus/icons-vue';
+import { read, utils } from 'xlsx'
 const students = ref()
 
+
+
 function getStudents() {
-    getAllStudentApi().then(({data}) => {
+    getAllStudentApi().then(({ data }) => {
         students.value = data
         filteredStudents.value = data
     })
@@ -84,6 +126,43 @@ onMounted(() => {
     getStudents()
 })
 
+const importStudents = ref<Student[]>()
+const dialogImportVisible = ref(false)
+
+function handleImport() {
+    dialogImportVisible.value = true
+}
+
+function loadFile(file: File) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        const data = e.target!.result
+        const workbook = read(data, { type: 'binary' })
+        const sheetNames = workbook.SheetNames
+        const worksheet = workbook.Sheets[sheetNames[0]]
+        const json = utils.sheet_to_json(worksheet, { header: ["student_id", "name", "gender", "email", "phone"] })
+
+        const stus = new Array<Student>()
+        json.slice(1).forEach((e) => {
+            stus.push(e as Student)
+        })
+        importStudents.value = stus
+
+    }
+    reader.readAsBinaryString(file)
+}
+function fileChange(file: UploadFile) {
+
+}
+
+const upload = ref<UploadInstance>()
+const handleExceed: UploadProps['onExceed'] = (files) => {
+    upload.value!.clearFiles()
+    const file = files[0] as UploadRawFile
+    file.uid = genFileId()
+    upload.value!.handleStart(file)
+    loadFile(file)
+}
 
 const student_id = ref('')
 const name = ref('')
@@ -101,10 +180,27 @@ function handleEdit(row: Student) {
     operate = 1
 }
 
-function handleDelete(row: Student) {
-    deleteStudentApi(row.user_id).then(res => {
-        getStudents()
+function handleCheck(row: Student) {
+    router.push({
+        path: '/exam/detail',
+        query: {
+            student_id: row.student_id
+        }
     })
+}
+function handleDelete(row: Student) {
+    ElMessageBox.confirm('此操作将删除该考生, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        deleteStudentApi(row.user_id).then(res => {
+            getStudents()
+        })
+    }).catch(() => {
+        console.log('取消删除')
+    })
+
 }
 
 function handleAdd() {
@@ -151,3 +247,12 @@ function addFormSubmit(formEl: FormInstance | undefined) {
     })
 }
 </script>
+
+<style>
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+</style>

@@ -31,7 +31,7 @@
     </el-table>
   </el-card>
   </div>
-  <question-info-dialog v-model:display="show" v-model:question="question" :exam_id="exam_id" :student_id="student_id" />
+  <question-info-dialog v-model:display="show" v-model:question="question" v-model:exam_id="exam_id" v-model:student_id="student_id" />
 </template>
 
 <script setup lang="ts">
@@ -42,8 +42,8 @@ import { showExamApi } from '@/api/exam/index'
 import { useUserStore } from '@/store/models/user'
 
 const prop = defineProps(['exam_id', "student_id"])
-const student_id = ref(prop.student_id || 'student111')
-const exam_id = ref(prop.exam_id || 'exam111')
+const student_id = ref(prop.student_id || '1000000011')
+const exam_id = ref(prop.exam_id || 'EX001')
 function handleSearch() {
   showExam()
 }

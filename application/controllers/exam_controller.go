@@ -13,6 +13,21 @@ func init() {
 	examService = services.NewExamService()
 }
 
+func CreateQuestions(c *gin.Context) {
+	var questions []*models.Question
+	err := c.ShouldBind(&questions)
+	if err != nil {
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+	err = examService.CreateQuestions(questions)
+	if err != nil {
+		c.JSON(500, Resp{Code: 1, Msg: err.Error()})
+		return
+	}
+	c.JSON(200, Resp{Code: 0})
+}
+
 func ListExams(c *gin.Context) {
 	exams := examService.ListExams()
 	c.JSON(200, Resp{Code: 0, Msg: "success", Data: exams})

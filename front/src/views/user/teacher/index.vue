@@ -3,20 +3,21 @@
         <el-card width="100%">
             <el-form :inline="true">
                 <el-form-item label="职工号">
-                    <el-input v-model="student_id" />
+                    <el-input v-model="teacher_id" />
                 </el-form-item>
                 <el-form-item label="姓名">
                     <el-input v-model="name" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="handleSearch">
-                        查询
-                    </el-button>
+                    <el-form-item><el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button></el-form-item>
                 </el-form-item>
+                <el-form-item>
+                <el-button type="primary" @click="handleAdd">添加</el-button>
+            </el-form-item>
             </el-form>
-            <el-button type="primary" @click="handleAdd">新增</el-button>
+            <el-divider></el-divider>
             <el-table :data="filteredTeachers">
-                <el-table-column prop="user_id" label="职工和号">
+                <el-table-column prop="teacher_id" label="职工号">
                 </el-table-column>
                 <el-table-column prop="name" label="姓名">
                 </el-table-column>
@@ -71,6 +72,7 @@
 import { Teacher } from '@/api/teacher/types';
 import { createTeacherApi, deleteTeacherApi, updateTeacherApi, getAllTeacherApi } from '@/api/teacher/index';
 import { FormInstance } from 'element-plus';
+import { Search } from '@element-plus/icons-vue';
 
 const teachers = ref()
 
@@ -85,12 +87,12 @@ onMounted(() => {
 })
 
 
-const student_id = ref('')
+const teacher_id = ref('')
 const name = ref('')
 const filteredTeachers = ref()
 function handleSearch() {
-    filteredTeachers.value = teachers.value.filter((student: Teacher) => {
-        return student.teacher_id.includes(student_id.value) && student.name.includes(name.value)
+    filteredTeachers.value = teachers.value.filter((teacher: Teacher) => {
+        return teacher.teacher_id.indexOf(teacher_id.value)==0 && teacher.name.indexOf(name.value)==0
     })
 }
 var operate = 0

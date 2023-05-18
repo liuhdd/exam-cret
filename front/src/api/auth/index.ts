@@ -30,3 +30,18 @@ export function deleteUserApi(username: string) {
         method: 'delete'
     })
 }
+
+export function resetUserApi(username: string) {
+    return request({
+        url: `/user/reset/${username}`,
+        method: 'put'
+    })
+}
+
+export function updateUserApi(user: User) {
+    return request({
+        url: `/user`,
+        method: 'put',
+        data: user
+    })
+}

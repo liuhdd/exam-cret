@@ -24,10 +24,13 @@ type markRepository struct {
 	contract *client.Contract
 }
 
-func NewMarkRepository() MarkRepository {
+func init() {
 	db := config.GetDB()
 	db.AutoMigrate(&models.MarkAction{})
 	db.AutoMigrate(&models.Mark{})
+}
+func NewMarkRepository() MarkRepository {
+	db := config.GetDB()
 	repo := &markRepository{db: db, contract: config.GetContract()}
 	return repo
 }
@@ -49,7 +52,7 @@ func (r *markRepository) UploadMarkToBC(mark *models.MarkAction) error {
 		mark.StudentID,
 		mark.QuestionID,
 		strconv.FormatUint(uint64(mark.Score), 10),
-		strconv.FormatInt(mark.ScoredTime, 10),
+		strconv.FormatInt(mark.ActionTime, 10),
 		mark.Scorer)
 	if err != nil {
 		return err

@@ -13,6 +13,21 @@ func init() {
 	studentService = services.NewStudentService()
 }
 
+func CreateStudents(c *gin.Context) {
+	var students []models.Student
+	err := c.ShouldBind(&students)
+	if err != nil {
+		c.JSON(400, Resp{Code: 1, Msg: "params missed or illegal"})
+		return
+	}
+	err = studentService.CreateStudents(&students)
+	if err != nil {
+		c.JSON(500, Resp{Code: 1, Msg: err.Error()})
+		return
+	}
+	c.JSON(200, Resp{Code: 0})
+	return
+}
 func CreateStudent(c *gin.Context) {
 	var student models.Student
 	err := c.ShouldBindJSON(&student)

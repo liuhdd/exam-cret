@@ -37,13 +37,10 @@ func NewTeacherService() TeacherService {
 }
 
 func (t *teacherService) CreateTeacher(teacher *models.Teacher) error {
-
-	teacher.UserID = teacher.TeacherID
 	teacher.Username = teacher.TeacherID
 	teacher.Password = "123456"
 	teacher.Role = "teacher"
 	u := models.User{
-		UserID:   teacher.UserID,
 		Username: teacher.Username,
 		Password: teacher.Password,
 		Role:     "teacher",

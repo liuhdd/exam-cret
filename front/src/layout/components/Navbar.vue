@@ -5,6 +5,10 @@ import { useAppStore } from "@/store/models/app";
 import { useTagsViewStore } from "@/store/models/tagsView";
 import { useUserStore } from "@/store/models/user";
 import { ElMessageBox } from "element-plus";
+import { User } from "@/api/auth/types";
+
+import {updateUserApi} from "@/api/auth"
+
 
 const appStore = useAppStore();
 const tagsViewStore = useTagsViewStore();
@@ -18,6 +22,34 @@ const { device } = storeToRefs(appStore); // 设备类型：desktop-宽屏设备
 function toggleSideBar() {
   appStore.toggleSidebar(true);
 }
+
+
+
+
+
+function handlerSetPwd(){
+  ElMessageBox.prompt('请输入密码', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /\S/,
+    inputErrorMessage: '密码不能为空',
+    inputType: 'password',
+    showClose: false,
+    closeOnClickModal: false,
+    closeOnPressEscape: false,
+    closeOnHashChange: false,
+    center: true
+  }).then(({ value }) => {
+    updateUserApi({ username: userStore.username,password: value } as User)
+      .then(() => {
+        ElMessage.success('修改成功')
+      })
+      .catch(() => {
+        ElMessage.error('修改失败')
+      })
+  })
+}
+
 
 // 注销
 function logout() {
@@ -55,6 +87,7 @@ function logout() {
       <!-- 导航栏设置(窄屏隐藏)-->
 
       <div v-if="device !== 'mobile'" class="flex items-center">
+        {{ userStore.username }}
         <!--全屏 -->
         <screenfull class="navbar-setting-item" />
         <!-- 布局大小 -->
@@ -68,10 +101,8 @@ function logout() {
       <!-- 用户头像 -->
       <el-dropdown trigger="click">
         <div class="flex justify-center items-center mx-2">
-          <img
-            :src="userStore.avatar + '?imageView2/1/w/80/h/80'"
-            class="w-[40px] h-[40px] rounded-lg"
-          />
+          <el-avatar class="w-[40px] h-[40px] rounded-lg"  src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
+          
           <i-ep-caret-bottom class="w-3 h-3" />
         </div>
         <template #dropdown>
@@ -79,15 +110,9 @@ function logout() {
             <router-link to="/">
               <el-dropdown-item>{{ $t("navbar.dashboard") }}</el-dropdown-item>
             </router-link>
-            <a target="_blank" href="https://github.com/hxrui">
-              <el-dropdown-item>Github</el-dropdown-item>
-            </a>
-            <a target="_blank" href="https://gitee.com/haoxr">
-              <el-dropdown-item>{{ $t("navbar.gitee") }}</el-dropdown-item>
-            </a>
-            <a target="_blank" href="https://www.cnblogs.com/haoxianrui/">
-              <el-dropdown-item>{{ $t("navbar.document") }}</el-dropdown-item>
-            </a>
+            <el-dropdown-item divided @click="handlerSetPwd">
+              修改密码
+            </el-dropdown-item>
             <el-dropdown-item divided @click="logout">
               {{ $t("navbar.logout") }}
             </el-dropdown-item>

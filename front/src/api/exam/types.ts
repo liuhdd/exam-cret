@@ -22,11 +22,14 @@ export interface Exam{
   exam_server: string;
   exam_server_key: string;
   exam_desc: string;
+  state: number;
 }
 // 定义 QuestionResult 类型
 export interface QuestionResult {
   question_id: string;
+  type: string;
   content: string;
+  options: string;
   answer: string;
   score: number;
 }

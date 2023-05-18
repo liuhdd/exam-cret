@@ -6,20 +6,40 @@
                     <el-input v-model="username" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="handleSearch">
-                        查询
-                    </el-button>
+                    <el-form-item><el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button></el-form-item>
                 </el-form-item>
+                <el-form-item>
+                <el-button type="primary" @click="handleAdd">新增</el-button>
+            </el-form-item>
             </el-form>
-            <el-button type="primary" @click="handleAdd">新增</el-button>
+            <el-divider></el-divider>
             <el-table :data="filteredUsers">
                 <el-table-column prop="username" label="用户名">
                 </el-table-column>
-                <el-table-column prop="role" label="角色">
+                <el-table-column prop="role" label="角色" 
+                :filters="[
+                    { text: 'admin', value: 'admin' },
+                    { text: 'teacher', value: 'teacher' },
+                    { text: 'student', value: 'student' },
+                ]"
+                :filter-method="filterTag"
+                >
+                    <template #default="scope">
+                        <el-tag v-if="scope.row.role" :type="scope.row.role === 'student' ? '' : 'success'"
+                            disable-transitions>
+                            {{ scope.row.role
+                            }}</el-tag>
+                    </template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template #default="{ row }">
                         <el-button type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
+                        <el-button :type="row.state === 1? 'warning' : 'success'" size="small" @click="">
+                            {{ row.state === 1 ? '禁用' : '启用' }}
+                        </el-button>
+                        <el-button type="primary" size="small" @click="handleReset(row)">
+                            重置密码
+                        </el-button>
                         <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
                     </template>
                 </el-table-column>
@@ -54,10 +74,10 @@
 
 <script setup lang="ts">
 import { Student } from '@/api/student/types';
-import { listUserApi, deleteUserApi } from '@/api/auth';
+import { listUserApi, deleteUserApi, resetUserApi } from '@/api/auth';
 import { FormInstance } from 'element-plus';
 import { User } from '@/api/auth/types';
-
+import { Search } from '@element-plus/icons-vue'
 const users = ref()
 
 function getStudents() {
@@ -67,10 +87,29 @@ function getStudents() {
     })
 }
 onMounted(() => {
-    alert()
     getStudents()
 })
 
+function handleReset(row: User) {
+
+    ElMessageBox.confirm('此操作将重置用户密码，是否继续？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        resetUserApi(row.username).then(res => {
+            ElMessage({
+                type: 'success',
+                message: '重置成功'
+            });
+        })
+    }).catch(() => {
+        ElMessage({
+            type: 'info',
+            message: '已取消重置'
+        });
+    });
+}
 
 const username = ref('')
 const filteredUsers = ref()
@@ -80,6 +119,9 @@ function handleSearch() {
     })
 }
 
+function filterTag(value: string, row: User) {
+    return row.role === value
+}
 
 function handleEdit(row: Student) {
     addForm.value = row
@@ -118,7 +160,7 @@ function addFormSubmit(formEl: FormInstance | undefined) {
     if (!formEl) return
     formEl.validate((valid) => {
         if (valid) {
-            
+
             dialogVisible.value = false
             addForm.value = {} as Student
         } else {

@@ -7,6 +7,7 @@ import (
 	"github.com/liuhdd/exam-cret/application/repository"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+
 	"sync"
 )
 
@@ -20,6 +21,7 @@ type StudentService interface {
 	GetAllStudents() ([]*models.Student, error)
 	UpdateStudent(student *models.Student) error
 	CreateStudent(student *models.Student) error
+	CreateStudents(students *[]models.Student) error
 }
 
 type studentService struct {
@@ -44,13 +46,36 @@ func NewStudentService() StudentService {
 	return s
 }
 
+func (s *studentService) CreateStudents(a *[]models.Student) error {
+	var students []models.Student
+	students = *a
+	users := make([]*models.User, len(students))
+	tx := s.db.Begin()
+	for i, student := range students {
+		student.Password = "123456"
+		student.Username = student.StudentID
+		student.Role = "student"
+		users[i] = &models.User{
+			Username: student.Username,
+			Password: student.Password,
+			Role:     "student",
+		}
+		tx.Create(&student)
+	}
+	tx.Create(&users)
+	if tx.Error != nil {
+		tx.Rollback()
+		return tx.Error
+	}
+	tx.Commit()
+	return nil
+}
 func (s *studentService) CreateStudent(student *models.Student) error {
+
 	student.Password = "123456"
-	student.UserID = student.StudentID
 	student.Username = student.StudentID
 	student.Role = "student"
 	u := models.User{
-		UserID:   student.UserID,
 		Username: student.Username,
 		Password: student.Password,
 		Role:     "student",

@@ -5,7 +5,8 @@
       <el-form :inline="true">
         <el-card>
           <el-form-item>
-            <el-autocomplete clearable :fetch-suggestions="querySearch"  v-model="exam_name" placeholder="考试科目" style="width: 200px"></el-autocomplete>
+            <el-autocomplete clearable :fetch-suggestions="querySearch" v-model="exam_name" placeholder="考试科目"
+              style="width: 200px"></el-autocomplete>
           </el-form-item>
 
           <el-form-item>
@@ -44,7 +45,7 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="300">
           <template v-slot="{ row }">
-            <el-button text bg type="success" @click="handleStart(row)">开始考试</el-button>
+            <el-button text bg type="success" :disabled="row.state == 1" @click="handleStart(row)">开始考试</el-button>
             <el-button text bg type="primary" @click="handleDetail(row)">详情</el-button>
             <el-button text bg type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -69,7 +70,7 @@
         <el-form-item label="考试时间" required>
           <el-col :span="11">
             <el-form-item prop="begin_time">
-              <el-date-picker  v-model="examForm.begin_time" type="datetime" placeholder="开始时间" value-format="x"
+              <el-date-picker v-model="examForm.begin_time" type="datetime" placeholder="开始时间" value-format="x"
                 style="width: 100%" />
             </el-form-item>
           </el-col>
@@ -99,7 +100,26 @@
     </el-dialog>
 
     <el-dialog v-model="startVisible">
-      haha
+      <el-card>
+        <template #header>
+            <div class="card-header">
+              <span>请为考试服务器设置认证口令</span>
+              <el-button class="button" size="small" type="primary">确定</el-button>
+            </div>
+          </template>
+      <el-form label-width="100px">
+        
+         
+          
+          <el-form-item label="口令" prop="key" required>
+            <el-input type="password"  v-model="key"></el-input>
+          </el-form-item>
+          <el-form-item label="确认口令" prop="confirmKey" required>
+            <el-input type="password" v-model="confirmKey"></el-input>
+          </el-form-item>
+        
+      </el-form>
+    </el-card>
     </el-dialog>
 
   </div>
@@ -110,7 +130,7 @@ import { getExamListApi, createExamApi, queryExamApi, deleteExamApi } from '@/ap
 import type { Exam } from '@/api/exam/types'
 import router from '@/router'
 import { useUserStore } from "@/store/models/user"
-import {Search} from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 
 const exams = ref<Exam[]>()
@@ -120,37 +140,40 @@ const start_time = ref(0)
 const end_time = ref(0)
 const userStore = useUserStore()
 
+const confirmKey = ref('')
+const key = ref('')
 const startVisible = ref(false)
 function handleStart(row: Exam) {
   startVisible.value = true
+
 }
 
-interface Item{
+interface Item {
   value: string
 }
 const filtedExams = ref<Exam[]>()
 const querySearch = (queryString: string, cb: any) => {
   const names = exams.value?.map(i => {
-    return {value: i.exam_name} as Item
+    return { value: i.exam_name } as Item
   })
-  
-  const res = queryString?
-   names?.filter((name) => name.value.includes(queryString)):
-   names
-   cb(res)
+
+  const res = queryString ?
+    names?.filter((name) => name.value.includes(queryString)) :
+    names
+  cb(res)
 }
-function handleSearch(){
+function handleSearch() {
   filtedExams.value = exams.value?.filter(exam => {
-      if(start_time.value != 0){
-        return exam.begin_time >= start_time.value
-      }
-      return true
-  }).filter(exam=>{
-    if(end_time.value != 0) {
+    if (start_time.value != 0) {
+      return exam.begin_time >= start_time.value
+    }
+    return true
+  }).filter(exam => {
+    if (end_time.value != 0) {
       return exam.end_time <= end_time.value
     }
     return true
-  }).filter(exam=>{
+  }).filter(exam => {
     return exam.exam_name.includes(exam_name.value)
   })
 }
@@ -187,7 +210,7 @@ function addFormSubmit(form) {
     if (valid) {
       createExamApi(examForm).then(res => {
         getExamList()
-      }).finally(()=>{
+      }).finally(() => {
         dialogVisible.value = false
       })
     }
@@ -207,12 +230,19 @@ function handleDetail(row) {
   console.log(exam_id.value)
   if (role == 'student') {
     router.push({
-      path: `/exam/verify/${exam_id.value}`,
+      path: `/exam/verify/`,
+      query: {
+        exam_id: exam_id.value,
+        student_id: userStore.username
+      }
     })
     return
   }
   router.push({
-    path: `/exam/detail/${exam_id.value}`,
+    path: `/exam/detail`,
+    query: {
+      exam_id: exam_id.value
+    }
   })
 
 }
@@ -232,5 +262,11 @@ function formatTime(time) {
   text-align: center;
   border-right: solid 1px var(--el-border-color);
   flex: 1;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

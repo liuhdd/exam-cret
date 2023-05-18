@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { constantRoutes } from "@/router";
 import { store } from "@/store";
 import { listRoutes } from "@/api/menu";
-
+import router from "@/router";
 const modules = import.meta.glob("../../views/**/**.vue");
 const Layout = () => import("@/layout/index.vue");
 
@@ -70,7 +70,7 @@ const filterAsyncRoutes = (routes: RouteRecordRaw[], roles: string[]) => {
 // setup
 export const usePermissionStore = defineStore("permission", () => {
   // state
-  const routes = ref<RouteRecordRaw[]>([]);
+  const routes = ref<RouteRecordRaw[]>(router.getRoutes());
 
   // actions
   function setRoutes(newRoutes: RouteRecordRaw[]) {

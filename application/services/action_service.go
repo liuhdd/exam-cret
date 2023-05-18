@@ -57,10 +57,11 @@ func (as *actionService) QueryActionByID(id string) (*models.ExamAction, error) 
 }
 
 func (as *actionService) UploadActions(actions *[]models.ExamAction) error {
-	err := as.actionRepo.AddActions(actions)
-	if err != nil {
-		log.Error(err)
-		return err
+	for _, action := range *actions {
+		err := as.UploadAction(&action)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -84,16 +85,25 @@ func (as *actionService) UploadAction(action *models.ExamAction) error {
 		},
 	}).Result()
 	db := config.GetDB()
+	db.Save(action)
+
 	mark := models.Mark{
 		ExamID:     action.ExamID,
 		StudentID:  action.StudentID,
 		QuestionID: action.QuestionID,
 	}
-	db.Table("marks").Where("exam_id = ? and student_id = ? and question_id = ?",
-		action.ExamID, action.StudentID, action.QuestionID).Select("score").
-		Scan(&mark)
-	mark.Answer = action.Answer
+	var answer string
+	s.db.Table("exam_actions").Where("exam_id = ? and student_id = ? and question_id = ?", mark.ExamID, mark.StudentID, mark.QuestionID).
+		Order("action_time desc").Limit(1).Select("answer").Scan(&answer)
+	s.db.Find(&mark)
+	mark.Answer = answer
 	db.Save(&mark)
+	er := models.ExamRecord{
+		ExamID:    mark.ExamID,
+		StudentID: mark.StudentID,
+	}
+	db.Find(&er)
+	db.Save(&er)
 	return nil
 }
 

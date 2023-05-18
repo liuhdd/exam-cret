@@ -24,12 +24,12 @@ const route = useRoute();
         <el-sub-menu index="user">
           <template #title>
             <svg-icon icon-class="user" />
-            用户管理
+            人员管理
           </template>
           <app-link to="/user/list">
             <el-menu-item index="/list" teleported>
               <span>
-                用户查询
+                用户管理
               </span>
             </el-menu-item>
           </app-link>
@@ -50,8 +50,8 @@ const route = useRoute();
         </el-sub-menu>
         <el-sub-menu index="/exam">
           <template #title>
-            <svg-icon icon-class="user" />
-            考试管理
+            <svg-icon icon-class="redis" />
+            数据管理
           </template>
           <app-link to="/exam/list">
             <el-menu-item index="/list" teleported>
@@ -77,20 +77,13 @@ const route = useRoute();
         </el-sub-menu>
         <el-sub-menu index="/system">
           <template #title>
-            <svg-icon icon-class="user" />
+            <svg-icon icon-class="system" />
             系统管理
           </template>
           <app-link to="/system/backup">
             <el-menu-item index="/role" teleported>
               <span>
                 数据备份
-              </span>
-            </el-menu-item>
-          </app-link>
-          <app-link to="/system/permission">
-            <el-menu-item index="/permission" teleported>
-              <span>
-                权限管理
               </span>
             </el-menu-item>
           </app-link>

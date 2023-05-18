@@ -49,14 +49,16 @@ import { useUserStore } from '@/store/models/user'
 import router from '@/router'
 import { Search } from '@element-plus/icons-vue'
 
-const prop = defineProps(['exam_id'])
-const student_id = ref('student111' || useUserStore().username)
+const prop = defineProps(['exam_id', 'student_id'])
+
+const student_id = ref(useUserStore().role == 'student'? useUserStore().username : prop.student_id || 'student111')
 const exam_id = ref(prop.exam_id || 'exam111')
 const grades = ref<Grade[]>()
 const role = useUserStore().role
 const exam_name = ref('')
 const student_name = ref('')
 const filterGrades = ref<Grade[]>()
+
 function handleSearch() {
   filterGrades.value = grades.value?.filter(item => {
     return item.exam_name.includes(exam_name.value) && 

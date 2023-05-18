@@ -33,8 +33,8 @@ function moveToTarget(currentTag: TagView) {
   const $containerWidth = $container.offsetWidth;
   const $scrollWrapper = scrollWrapper.value;
 
-  let firstTag = null;
-  let lastTag = null;
+  let firstTag = {} as TagView;
+  let lastTag = {} as TagView;
 
   // find first tag and last tag
   if (tagsViewStore.visitedViews.length > 0) {
@@ -51,8 +51,8 @@ function moveToTarget(currentTag: TagView) {
     const currentIndex = tagsViewStore.visitedViews.findIndex(
       (item) => item === currentTag
     );
-    let prevTag = null;
-    let nextTag = null;
+    let prevTag = {} as Element;
+    let nextTag = {} as Element;
     for (const k in tagListDom) {
       if (k !== "length" && Object.hasOwnProperty.call(tagListDom, k)) {
         if (

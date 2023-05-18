@@ -6,8 +6,8 @@ export default { name: "Dashboard" };
 import { useUserStore } from "@/store/models/user";
 import { useTransition, TransitionPresets } from "@vueuse/core";
 
-// import GithubCorner from "@/components/GithubCorner/index.vue";
-// import SvgIcon from "@/components/SvgIcon/index.vue";
+import GithubCorner from "@/components/GithubCorner/index.vue";
+import SvgIcon from "@/components/SvgIcon/index.vue";
 // import BarChart from "./components/BarChart.vue";
 // import PieChart from "./components/PieChart.vue";
 // import RadarChart from "./components/RadarChart.vue";
@@ -75,40 +75,13 @@ orderCount.value = 2000;
       <el-card class="w-full">
         <div class="flex justify-between flex-wrap">
           <div class="flex items-center">
-            <img
-              class="user-avatar"
-              :src="userStore.avatar + '?imageView2/1/w/80/h/80'"
-            />
             <span class="ml-[10px] text-[16px]">
-              {{ userStore.name }}
+              {{ userStore.username }}
             </span>
           </div>
 
-          <div class="leading-[40px]">
+          <div class="leading-[40px]" items-center>
             {{ greetings }}
-          </div>
-
-          <div class="space-x-2 flex items-center">
-            <el-link
-              target="_blank"
-              type="danger"
-              href="https://www.cnblogs.com/haoxianrui/p/16090029.html"
-              >官方0到1教程</el-link
-            >
-            <el-divider direction="vertical" />
-            <el-link
-              target="_blank"
-              type="success"
-              href="https://gitee.com/youlaiorg/vue3-element-admin"
-              >Gitee源码</el-link
-            >
-            <el-divider direction="vertical" />
-            <el-link
-              target="_blank"
-              type="primary"
-              href="https://github.com/youlaitech/vue3-element-admin"
-              >GitHub源码
-            </el-link>
           </div>
         </div>
       </el-card>
