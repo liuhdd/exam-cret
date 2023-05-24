@@ -51,8 +51,8 @@ import { Search } from '@element-plus/icons-vue'
 
 const prop = defineProps(['exam_id', 'student_id'])
 
-const student_id = ref(useUserStore().role == 'student'? useUserStore().username : prop.student_id || 'student111')
-const exam_id = ref(prop.exam_id || 'exam111')
+const student_id = ref(useUserStore().role == 'student'? useUserStore().username : prop.student_id || '1000000011')
+const exam_id = ref(prop.exam_id || 'EX001')
 const grades = ref<Grade[]>()
 const role = useUserStore().role
 const exam_name = ref('')

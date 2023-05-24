@@ -17,6 +17,7 @@ type MarkService interface {
 	UploadMarkAction(mark *models.MarkAction) error
 	GetScores(examID, studentID string) ([]*dto.Score, error)
 	SaveMarks(marks *[]models.MarkAction) error
+	GetMarks(query *models.MarkAction) (marks []*dto.Score)
 }
 
 type markService struct {
@@ -25,6 +26,13 @@ type markService struct {
 	markRepo repository.MarkRepository
 }
 
+func (s *markService) GetMarks(query *models.MarkAction) (marks []*dto.Score) {
+	s.db.Table("mark_actions").Where("exam_id = ? and  student_id = ? and  question_id = ?",
+		query.ExamID, query.StudentID, query.QuestionID).
+		Order("action_time").Select("action_id, question_id, score, scorer as scored_by, action_time as scored_time").
+		Scan(&marks)
+	return
+}
 func (s *markService) SaveMarks(marks *[]models.MarkAction) error {
 
 	for _, mark := range *marks {

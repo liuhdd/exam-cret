@@ -170,14 +170,15 @@ func (s *examService) FindExamsByStudentID(id string) ([]*models.Exam, error) {
 func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID string) (*dto.ExamResult, error) {
 
 	var result []*dto.QuestionResult
-	tx := s.db.Raw("select marks.question_id as question_id, question_type, content, options marks.answer as answer, marks.score as score "+
+	tx := s.db.Raw("select marks.question_id as question_id,question_type, content, options, marks.answer as answer, marks.score as score "+
 		"from marks left join questions on marks.question_id = questions.question_id "+
 		"where exam_id = ? and student_id = ?", examID, studentID).
 		Scan(&result)
+	name := ""
+	tx.Table("students").Select("name").Where("student_id = ?", studentID).Scan(&name)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
 	var exam models.Exam
 	tx = s.db.Where("exam_id=?", examID).First(&exam)
 	if tx.Error != nil {
@@ -190,13 +191,14 @@ func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID strin
 		return nil, tx.Error
 	}
 	return &dto.ExamResult{
-		ExamID:    examID,
-		StudentID: studentID,
-		ExamName:  exam.ExamName,
-		BeginTime: exam.BeginTime,
-		EndTime:   exam.EndTime,
-		Grade:     examRecord.Grade,
-		Questions: result,
+		ExamID:      examID,
+		StudentID:   studentID,
+		StudentName: name,
+		ExamName:    exam.ExamName,
+		BeginTime:   exam.BeginTime,
+		EndTime:     exam.EndTime,
+		Grade:       examRecord.Grade,
+		Questions:   result,
 	}, nil
 }
 

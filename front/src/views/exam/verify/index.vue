@@ -16,6 +16,8 @@
       <el-descriptions-item label="考试科目">{{ examResult?.exam_name }}</el-descriptions-item>
       <el-descriptions-item label="开始时间">{{ formatTime(examResult?.begin_time) }}</el-descriptions-item>
       <el-descriptions-item label="结束时间">{{ formatTime(examResult?.end_time) }}</el-descriptions-item>
+      <el-descriptions-item label="学号">{{ examResult?.student_id }}</el-descriptions-item>
+      <el-descriptions-item label="姓名">{{ examResult?.student_name }}</el-descriptions-item>
       <el-descriptions-item label="分数">{{ examResult?.grade }}</el-descriptions-item>
     </el-descriptions> 
     <el-divider></el-divider>
@@ -37,10 +39,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ExamResult, QuestionResult } from "@/api/exam/types"
-import QuestionInfoDialog from './components/QestionInfoDialog/index.vue'
 import { showExamApi } from '@/api/exam/index'
 import { useUserStore } from '@/store/models/user'
-
+import QuestionInfoDialog from '@/components/QuestionInfoDialog/index.vue'
 const prop = defineProps(['exam_id', "student_id"])
 const student_id = ref(prop.student_id || '1000000011')
 const exam_id = ref(prop.exam_id || 'EX001')

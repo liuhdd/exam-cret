@@ -1,15 +1,16 @@
 package dto
 
 type ExamResult struct {
-	ExamID    string            `json:"exam_id"`
-	ExamName  string            `json:"exam_name"`
-	BeginTime int64             `json:"begin_time"`
-	EndTime   int64             `json:"end_time"`
-	StudentID string            `json:"student_id"`
-	Place     string            `json:"place"`
-	Paper     string            `json:"paper"`
-	Grade     int               `json:"grade"`
-	Questions []*QuestionResult `json:"questions"`
+	ExamID      string            `json:"exam_id"`
+	ExamName    string            `json:"exam_name"`
+	BeginTime   int64             `json:"begin_time"`
+	EndTime     int64             `json:"end_time"`
+	StudentID   string            `json:"student_id"`
+	StudentName string            `json:"student_name"`
+	Place       string            `json:"place"`
+	Paper       string            `json:"paper"`
+	Grade       int               `json:"grade"`
+	Questions   []*QuestionResult `json:"questions"`
 }
 
 type QuestionResult struct {

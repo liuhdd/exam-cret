@@ -6,6 +6,7 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 
+
 import Icons from 'unplugin-icons/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 
@@ -37,7 +38,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       }
     },
     server: {
-      host: 'localhost',
+      host: '0.0.0.0',
       port: 8080,
       open: true, // 运行是否自动打开浏览器
       // 反向代理解决跨域

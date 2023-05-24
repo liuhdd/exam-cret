@@ -2,6 +2,7 @@
 export interface ExamResult {
   exam_id: string;
   student_id: string;
+  student_name: string;
   exam_name: string;
   begin_time: number;
   end_time: number;

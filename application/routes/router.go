@@ -88,6 +88,7 @@ func SetupRoutes() {
 
 	score := engine.Group("score")
 	{
+		score.GET("/actions", controllers.GetMarkActions)
 		score.GET("/query", controllers.GetQuestionScore)
 		score.POST("/upload", controllers.UploadExamScore)
 		score.POST("/import", controllers.UploadExamScores)

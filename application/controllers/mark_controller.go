@@ -14,6 +14,18 @@ func init() {
 	markService = services.NewMarkService()
 }
 
+func GetMarkActions(c *gin.Context) {
+	var q models.MarkAction
+	q.ExamID = c.Query("exam_id")
+	q.StudentID = c.Query("student_id")
+	q.QuestionID = c.Query("question_id")
+	if q.ExamID == "" || q.QuestionID == "" || q.StudentID == "" {
+		c.JSON(http.StatusBadRequest, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+	marks := markService.GetMarks(&q)
+	c.JSON(http.StatusOK, Resp{Code: 0, Data: marks})
+}
 func GetQuestionScore(c *gin.Context) {
 	questionID := c.Query("question_id")
 	studentID := c.Query("student_id")
