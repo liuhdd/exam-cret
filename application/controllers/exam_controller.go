@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/liuhdd/exam-cret/application/models"
 	"github.com/liuhdd/exam-cret/application/services"
 	"github.com/liuhdd/exam-cret/application/services/dto"
@@ -13,6 +14,17 @@ func init() {
 	examService = services.NewExamService()
 }
 
+func AuthExam(c *gin.Context) {
+	examId := c.PostForm("exam_id")
+	key := c.PostForm("key")
+	if examId == "" || key == "" {
+		c.JSON(400, Resp{Code: 1, Msg: "invalid params"})
+		return
+	}
+
+	c.JSON(200, Resp{Code: 0, Data: uuid.New().String()})
+	return
+}
 func CreateQuestions(c *gin.Context) {
 	var questions []*models.Question
 	err := c.ShouldBind(&questions)

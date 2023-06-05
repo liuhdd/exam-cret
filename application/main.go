@@ -8,6 +8,6 @@ import (
 func main() {
 
 	engine := routes.InitEngine()
-	jobs.ActionJob()
+	jobs.Setup()
 	engine.Run()
 }

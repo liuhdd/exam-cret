@@ -56,7 +56,7 @@ const route = useRoute();
           <app-link to="/exam/list">
             <el-menu-item index="/list" teleported>
               <span>
-                考试查询
+                考试管理
               </span>
             </el-menu-item>
           </app-link>

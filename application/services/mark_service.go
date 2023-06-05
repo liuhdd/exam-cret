@@ -61,11 +61,6 @@ func (s *markService) UploadMarkAction(mark *models.MarkAction) error {
 		return err
 	}
 
-	//err = s.markRepo.UploadMarkToBC(mark)
-	//if err != nil {
-	//	log.Printf("failed to upload mark to blockchain: %s", err)
-	//	return err
-	//}
 	m := models.Mark{
 		ExamID:     mark.ExamID,
 		StudentID:  mark.StudentID,

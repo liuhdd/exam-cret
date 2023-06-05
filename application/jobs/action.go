@@ -11,6 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func Setup() {
+	ActionJob()
+	MarkJob()
+}
 func ActionJob() {
 	rdb := config.GetRedisClient()
 	args := &redis.XReadGroupArgs{

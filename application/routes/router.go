@@ -84,6 +84,7 @@ func SetupRoutes() {
 		exam.GET("/list", controllers.ListExams)
 		exam.POST("/query", controllers.QueryExams)
 		exam.POST("/grades", controllers.QueryGrades)
+		exam.POST("/auth", controllers.AuthExam)
 	}
 
 	score := engine.Group("score")

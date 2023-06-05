@@ -30,7 +30,7 @@
                                 
                                 
                             </el-upload>
-                            <el-button class="button" type="success">导入</el-button>
+                            <el-button class="button" type="success" @click="importSudent">导入</el-button>
                         </div>
                     </template>
 
@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { Student } from '@/api/student/types';
-import { getAllStudentApi, createStudentApi, updateStudentApi, deleteStudentApi } from '@/api/student/index';
+import { getAllStudentApi, createStudentApi, updateStudentApi, deleteStudentApi, importStudentApi } from '@/api/student/index';
 import { ElDialog, ElMessageBox, FormInstance, UploadFile, UploadInstance, UploadProps, UploadRawFile, genFileId } from 'element-plus';
 import router from '@/router';
 import { Search } from '@element-plus/icons-vue';
@@ -133,6 +133,17 @@ function handleImport() {
     dialogImportVisible.value = true
 }
 
+function importSudent() {
+    console.log(importStudents.value as Student[])
+    importStudentApi(importStudents.value as Student[]).then(()=>{
+        ElMessage.success("导入成功")
+        getStudents()
+        dialogImportVisible.value = false
+    }).catch(()=>{
+        ElMessage.error("导入失败")
+    })
+}
+
 function loadFile(file: File) {
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -140,11 +151,17 @@ function loadFile(file: File) {
         const workbook = read(data, { type: 'binary' })
         const sheetNames = workbook.SheetNames
         const worksheet = workbook.Sheets[sheetNames[0]]
-        const json = utils.sheet_to_json(worksheet, { header: ["student_id", "name", "gender", "email", "phone"] })
+        const json: Student[] = utils.sheet_to_json(worksheet, { header: ["student_id", "name", "gender", "email", "phone"] })
 
         const stus = new Array<Student>()
-        json.slice(1).forEach((e) => {
-            stus.push(e as Student)
+        json.slice(1).forEach((i) => {
+            stus.push({
+                student_id: i.student_id.toString(),
+                name: i.name,
+                email: i.email,
+                phone: i.phone.toString(),
+                gender: i.gender
+            } as Student)
         })
         importStudents.value = stus
 

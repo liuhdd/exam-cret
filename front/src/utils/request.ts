@@ -4,7 +4,7 @@ import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { useUserStoreHook } from '@/store/models/user'
 
 const request = axios.create({
-    baseURL: "http://172.21.194.189:8080",
+    baseURL: "http://localhost:8080",
     timeout: 5000,
     headers: { 'Content-Type': 'application/json' }
 });

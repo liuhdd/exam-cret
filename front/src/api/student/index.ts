@@ -48,3 +48,11 @@ export function getAllStudentApi() :AxiosPromise<Student[]> {
         method: 'get',
     })
 }
+
+export function importStudentApi(students: Student[]) {
+    return request({
+        url: 'student/import',
+        method: 'post',
+        data: students
+    })
+}
