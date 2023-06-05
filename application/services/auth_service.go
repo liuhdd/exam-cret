@@ -78,11 +78,26 @@ func (as *authService) Login(user *models.User) (string, error) {
 		if err != nil {
 			return "", err
 		}
-
-		err = as.rdb.HSet(context.Background(), token, stu).Err()
+		ctx := context.Background()
+		err = as.rdb.HSet(ctx, token, stu).Err()
 		if err != nil {
 			return "", err
 		}
+
+		examSer := NewExamService()
+		exams, _ := examSer.FindExamsByStudentID(stu.StudentID)
+		if err != nil {
+			for _, e := range exams {
+				res, _ := examSer.FindExamResultByExamIDAndStudentID(e.ExamID, stu.StudentID)
+				err := as.rdb.HSet(ctx, e.ExamID+":"+stu.StudentID, res).Err()
+				if err != nil {
+					return "", err
+				}
+			}
+
+		}
+
 	}
+
 	return token, nil
 }

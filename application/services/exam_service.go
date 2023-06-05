@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/liuhdd/exam-cret/application/config"
 	"github.com/liuhdd/exam-cret/application/models"
@@ -168,6 +169,15 @@ func (s *examService) FindExamsByStudentID(id string) ([]*models.Exam, error) {
 	return s.examRepo.GetExamsByStudentID(id)
 }
 func (s *examService) FindExamResultByExamIDAndStudentID(examID, studentID string) (*dto.ExamResult, error) {
+	rdb := config.GetRedisClient()
+	var e *dto.ExamResult
+	err := rdb.HGetAll(context.Background(), examID+":"+studentID).Scan(&e)
+	if err != nil {
+		log.Error(err)
+	}
+	if e != nil {
+		return e, nil
+	}
 
 	var result []*dto.QuestionResult
 	tx := s.db.Raw("select marks.question_id as question_id,question_type, content, options, marks.answer as answer, marks.score as score "+
